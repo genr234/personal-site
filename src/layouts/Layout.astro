@@ -1,22 +1,52 @@
+---
+import Header from "../components/Header.astro";
+---
 <!doctype html>
 <html lang="en">
 	<head>
 		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width" />
 		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+        <link rel="preconnect" href="https://rsms.me/">
+        <link rel="stylesheet" href="https://rsms.me/inter/inter.css">
 		<meta name="generator" content={Astro.generator} />
 		<title>Astro Basics</title>
 	</head>
 	<body>
-		<slot />
+    <Header centerText="" currentPath={Astro.url.pathname} />
+    <slot />
 	</body>
 </html>
 
-<style>
+<style is:global>
 	html,
 	body {
 		margin: 0;
 		width: 100%;
 		height: 100%;
+		background-color: #52D99A;
 	}
+    body::selection {
+        background-color: #D9D9D9;
+        opacity: 0.1;
+    }
+    @font-face {
+        font-family: Gentle;
+        src: url(/fonts/gentle.otf);
+    }
+    @font-face {
+        font-family: Nano;
+        src: url(/fonts/nano.ttf);
+    }
+    @font-face {
+        font-family: Cutta;
+        src: url(/fonts/cutta-bold.otf);
+    }
+    :root {
+        font-family: Inter, sans-serif;
+        font-feature-settings: 'liga' 1, 'calt' 1; /* fix for Chrome */
+    }
+    @supports (font-variation-settings: normal) {
+        :root { font-family: InterVariable, sans-serif; }
+    }
 </style>

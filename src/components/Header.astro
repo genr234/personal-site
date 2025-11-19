@@ -1,0 +1,214 @@
+---
+// Header.astro
+interface Props {
+    currentPath?: string;
+    centerText?: string;
+}
+
+const { currentPath = '/', centerText = '' } = Astro.props;
+
+const navItems = [
+    { label: 'Blog', href: '/blog' },
+    { label: 'About', href: '/about' },
+    { label: 'Contact', href: '/contact' }
+];
+---
+
+<script is:inline>
+    const CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    const activeAnimations = new WeakMap();
+
+    function getRandomChar() {
+        return CHARS[Math.floor(Math.random() * CHARS.length)];
+    }
+
+    function shuffleText(element) {
+        // Cancel any existing animation on this element
+        if (activeAnimations.has(element)) {
+            clearInterval(activeAnimations.get(element));
+        }
+
+        const originalText = element.dataset.originalText || element.textContent;
+        element.dataset.originalText = originalText;
+
+        const textLength = originalText.lengsth;
+        const duration = 600;
+        const frameRate = 50;
+        const totalFrames = Math.ceil(duration / frameRate);
+        let currentFrame = 0;
+
+        const interval = setInterval(() => {
+            let displayText = '';
+            const progress = currentFrame / totalFrames;
+            const revealCount = Math.floor(textLength * progress);
+
+            for (let i = 0; i < textLength; i++) {
+                if (i < revealCount) {
+                    displayText += originalText[i];
+                } else {
+                    displayText += getRandomChar();
+                }
+            }
+
+            element.textContent = displayText;
+            currentFrame++;
+
+            if (currentFrame > totalFrames) {
+                clearInterval(interval);
+                activeAnimations.delete(element);
+                element.textContent = originalText;
+            }
+        }, frameRate);
+
+        activeAnimations.set(element, interval);
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        // Find the header and only target leaf elements that contain text
+        const header = document.querySelector('.site-header');
+        if (!header) return;
+
+        const targets = Array.from(header.querySelectorAll('*')).filter(el => {
+            if (el.children.length > 0) return false;
+            const txt = (el.textContent || '').trim();
+            return txt.length > 0;
+        });
+
+        targets.forEach(el => shuffleText(el));
+    });
+</script>
+
+<header class="site-header">
+    <div class="header-container">
+        <div class="header-name">
+            <a href="/" class="name-link">
+                genr234
+            </a>
+        </div>
+
+        <span class="header-center">
+            {centerText}
+        </span>
+
+        <nav class="header-nav">
+            {navItems.map(item => (
+                    <a
+                            href={item.href}
+                            class:list={['nav-item', { active: currentPath === item.href }]}
+                    >
+                        {item.label}
+                    </a>
+            ))}
+        </nav>
+    </div>
+</header>
+
+<style>
+    .site-header {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 1000;
+    }
+
+    .header-container {
+        display: grid;
+        grid-template-columns: 1fr auto 1fr;
+        align-items: center;
+        padding: 12px 20px;
+        max-width: 100%;
+        font-family: Gentle, sans-serif;
+    }
+
+    .header-name {
+        justify-self: start;
+    }
+
+    .name-link {
+        text-decoration: none;
+        font-family: Nano, sans-serif;
+        font-size: 1.125rem;
+        font-weight: 400;
+        display: inline-block;
+        letter-spacing: 0.01em;
+        color: #0D0D0D;
+    }
+
+
+    .name-link:hover {
+        animation: rotate-wave 0.6s ease-in-out;
+    }
+
+    @keyframes rotate-wave {
+        0%, 100% {
+            transform: rotate(0deg);
+        }
+        50% {
+            transform: rotate(8deg);
+        }
+    }
+
+    .header-center {
+        justify-self: center;
+        color: #0D0D0D;
+        font-family: Cutta, sans-serif;
+        font-size: 0.9375rem;
+        letter-spacing: 0.01em;
+    }
+
+    .header-nav {
+        justify-self: end;
+        display: flex;
+        gap: 2rem;
+    }
+
+    .nav-item {
+        text-decoration: none;
+        color: #0D0D0D;
+        font-size: 0.9375rem;
+        position: relative;
+        transition: opacity 0.2s ease;
+        opacity: 0.4;
+        letter-spacing: 0.01em;
+        font-variant-numeric: tabular-nums;
+        display: inline-block;
+        width: fit-content;
+    }
+
+    .nav-item.active {
+        opacity: 1;
+    }
+
+    .nav-item.active::after {
+        content: '';
+        position: absolute;
+        bottom: -2px;
+        left: 0;
+        right: 0;
+        height: 1px;
+        background: black;
+    }
+
+    .nav-item:hover {
+        opacity: 1;
+    }
+
+    @media (max-width: 768px) {
+        .header-container {
+            grid-template-columns: 1fr;
+            gap: 1rem;
+            padding: 1rem 1.5rem;
+        }
+
+        .header-name,
+        .header-center,
+        .header-nav {
+            justify-self: center;
+        }
+
+        .header-nav {
+            gap: 1.5rem;
+        }
+    }
+</style>

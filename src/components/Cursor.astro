@@ -1,0 +1,144 @@
+---
+---
+
+        <div id="cursor-dot" class="cursor-element"></div>
+        <div id="cursor-circle" class="cursor-element"></div>
+        <div id="cursor-glow" class="cursor-element"></div>
+
+        <style>
+            .cursor-element {
+                position: fixed;
+                pointer-events: none;
+                z-index: 9999;
+            }
+
+            #cursor-dot {
+                width: 8px;
+                height: 8px;
+                background: black;
+                border-radius: 50%;
+                margin-top: -3px;
+                transition: background 0.3s ease;
+            }
+
+            #cursor-circle {
+                width: 28px;
+                height: 28px;
+                border: 2px solid black;
+                border-radius: 50%;
+                transition: width 0.3s ease, height 0.3s ease, border-color 0.3s ease;
+                margin-top: -3px;
+            }
+
+            .cursor-element.hover-blend {
+                mix-blend-mode: difference;
+            }
+
+            .cursor-element.hover-blend#cursor-dot {
+                background: white;
+            }
+
+            .cursor-element.hover-blend#cursor-circle {
+                border-color: white;
+            }
+
+            @keyframes breathe {
+                0%, 100% {
+                    transform: scale(1);
+                }
+                50% {
+                    transform: scale(1.2);
+                }
+            }
+
+            a, button, [role="button"], :hover {
+                cursor: none;
+            }
+        </style>
+
+        <script>
+            const dot = document.getElementById('cursor-dot');
+            const circle = document.getElementById('cursor-circle');
+
+            let mouseX = 0, mouseY = 0;
+            let dotX = 0, dotY = 0;
+            let circleX = 0, circleY = 0;
+
+            document.body.style.cursor = 'none';
+
+
+            document.addEventListener('mousemove', (e) => {
+                mouseX = e.clientX;
+                mouseY = e.clientY;
+
+                // Check if cursor is over any element (not body/html)
+                const elementUnderCursor = document.elementFromPoint(e.clientX, e.clientY);
+                const isOverElement = elementUnderCursor &&
+                                     elementUnderCursor.tagName !== 'BODY' &&
+                                     elementUnderCursor.tagName !== 'HTML' &&
+                                     elementUnderCursor.tagName !== 'DIV' &&
+                                     !elementUnderCursor.classList.contains('cursor-element');
+
+                if (isOverElement) {
+                    if (dot) dot.classList.add('hover-blend');
+                    if (circle) circle.classList.add('hover-blend');
+                } else {
+                    if (dot) dot.classList.remove('hover-blend');
+                    if (circle) circle.classList.remove('hover-blend');
+                }
+            });
+
+            function animate() {
+                dotX = mouseX;
+                dotY = mouseY;
+
+                const circleSpeed = 0.30;
+                circleX += (mouseX - circleX) * circleSpeed;
+                circleY += (mouseY - circleY) * circleSpeed;
+
+
+                if (dot) (dot as HTMLElement).style.transform = `translate(calc(${dotX}px - 50%), calc(${dotY}px - 50%))`;
+                if (circle) (circle as HTMLElement).style.transform = `translate(calc(${circleX}px - 50%), calc(${circleY}px - 50%))`;
+
+                requestAnimationFrame(animate);
+            }
+
+            animate();
+
+            const interactiveElements = document.querySelectorAll('a, button, [role="button"]');
+
+            interactiveElements.forEach(el => {
+                const elH = el as HTMLElement;
+                elH.style.cursor = 'none';
+
+                el.addEventListener('mouseenter', () => {
+                    if (circle) {
+                        (circle as HTMLElement).style.width = '44px';
+                        (circle as HTMLElement).style.height = '44px';
+                    }
+                });
+
+                el.addEventListener('mouseleave', () => {
+                    if (circle) {
+                        (circle as HTMLElement).style.width = '28px';
+                        (circle as HTMLElement).style.height = '28px';
+                    }
+                });
+
+                el.addEventListener('mousemove', () => {
+                    const rect = el.getBoundingClientRect();
+                    const centerX = rect.left + rect.width / 2;
+                    const centerY = rect.top + rect.height / 2;
+
+                    const distance = Math.sqrt(
+                        Math.pow(mouseX - centerX, 2) + Math.pow(mouseY - centerY, 2)
+                    );
+
+                    if (distance < 80) {
+                        const pullStrength = 0.6;
+                        mouseX += (centerX - mouseX) * pullStrength;
+                        mouseY += (centerY - mouseY) * pullStrength;
+                    }
+                });
+            });
+        </script>
