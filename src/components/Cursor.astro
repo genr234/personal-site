@@ -10,6 +10,7 @@
                 position: fixed;
                 pointer-events: none;
                 z-index: 9999;
+                transition: opacity 0.05s ease-out;
             }
 
             #cursor-dot {
@@ -18,7 +19,7 @@
                 background: black;
                 border-radius: 50%;
                 margin-top: -3px;
-                transition: background 0.3s ease;
+                transition: background 0.2s ease, opacity 0.05s ease-out;
             }
 
             #cursor-circle {
@@ -26,7 +27,7 @@
                 height: 28px;
                 border: 2px solid black;
                 border-radius: 50%;
-                transition: width 0.3s ease, height 0.3s ease, border-color 0.3s ease;
+                transition: width 0.2s ease, height 0.2s ease, border-color 0.2s ease, opacity 0.05s ease-out;
                 margin-top: -3px;
             }
 
@@ -57,36 +58,88 @@
         </style>
 
         <script>
-            const dot = document.getElementById('cursor-dot');
-            const circle = document.getElementById('cursor-circle');
+             const dot = document.getElementById('cursor-dot');
+             const circle = document.getElementById('cursor-circle');
 
-            let mouseX = 0, mouseY = 0;
-            let dotX = 0, dotY = 0;
-            let circleX = 0, circleY = 0;
+             let mouseX = 0, mouseY = 0;
+             let dotX = 0, dotY = 0;
+             let circleX = 0, circleY = 0;
+             let currentOpacity = 1;
+             let lastElementHover = null;
+             let pendingMouseMove = false;
 
-            document.body.style.cursor = 'none';
+            const isTouch = matchMedia('(pointer: coarse)').matches || 'ontouchstart' in window;
+            if (!isTouch) {
+               document.body.style.cursor = 'none';
+            } else {
+                document.querySelectorAll('.cursor-element').forEach(el => el.remove());
+            }
 
-
-            document.addEventListener('mousemove', (e) => {
+             document.addEventListener('mousemove', (e) => {
                 mouseX = e.clientX;
                 mouseY = e.clientY;
 
+                if (!pendingMouseMove) {
+                    pendingMouseMove = true;
+                    requestAnimationFrame(updateCursorState);
+                }
+            });
+
+            function updateCursorState() {
+                pendingMouseMove = false;
+
+                // Check if window is being dragged
+                const isDragging = document.body.classList.contains('window-dragging');
+
+                // Only update opacity if state changed
+                if (isDragging && currentOpacity !== 0) {
+                    currentOpacity = 0;
+                    if (dot) (dot as HTMLElement).style.opacity = '0';
+                    if (circle) (circle as HTMLElement).style.opacity = '0';
+                } else if (!isDragging && currentOpacity !== 1) {
+                    currentOpacity = 1;
+                    if (dot) (dot as HTMLElement).style.opacity = '1';
+                    if (circle) (circle as HTMLElement).style.opacity = '1';
+                }
+
+                if (isDragging) return;
+
                 // Check if cursor is over any element (not body/html)
-                const elementUnderCursor = document.elementFromPoint(e.clientX, e.clientY);
+                const elementUnderCursor = document.elementFromPoint(mouseX, mouseY);
+
+                // Check if over window header (draggable area)
+                const isOverWindowHeader = elementUnderCursor?.closest('[class*="windowHeader"]');
+
                 const isOverElement = elementUnderCursor &&
                                      elementUnderCursor.tagName !== 'BODY' &&
                                      elementUnderCursor.tagName !== 'HTML' &&
                                      elementUnderCursor.tagName !== 'DIV' &&
                                      !elementUnderCursor.classList.contains('cursor-element');
 
-                if (isOverElement) {
-                    if (dot) dot.classList.add('hover-blend');
-                    if (circle) circle.classList.add('hover-blend');
-                } else {
-                    if (dot) dot.classList.remove('hover-blend');
-                    if (circle) circle.classList.remove('hover-blend');
+                // Only update if element hover state changed
+                const newHover = isOverWindowHeader ? 'header' : (isOverElement ? 'element' : 'none');
+
+                if (newHover !== lastElementHover) {
+                    lastElementHover = newHover;
+
+                    if (isOverWindowHeader) {
+                        if (circle) (circle as HTMLElement).style.width = '36px';
+                        if (circle) (circle as HTMLElement).style.height = '36px';
+                        if (dot) dot.classList.add('hover-blend');
+                        if (circle) circle.classList.add('hover-blend');
+                    } else if (isOverElement) {
+                        if (circle) (circle as HTMLElement).style.width = '44px';
+                        if (circle) (circle as HTMLElement).style.height = '44px';
+                        if (dot) dot.classList.add('hover-blend');
+                        if (circle) circle.classList.add('hover-blend');
+                    } else {
+                        if (circle) (circle as HTMLElement).style.width = '28px';
+                        if (circle) (circle as HTMLElement).style.height = '28px';
+                        if (dot) dot.classList.remove('hover-blend');
+                        if (circle) circle.classList.remove('hover-blend');
+                    }
                 }
-            });
+            }
 
             function animate() {
                 dotX = mouseX;
@@ -96,7 +149,6 @@
                 circleX += (mouseX - circleX) * circleSpeed;
                 circleY += (mouseY - circleY) * circleSpeed;
 
-
                 if (dot) (dot as HTMLElement).style.transform = `translate(calc(${dotX}px - 50%), calc(${dotY}px - 50%))`;
                 if (circle) (circle as HTMLElement).style.transform = `translate(calc(${circleX}px - 50%), calc(${circleY}px - 50%))`;
 
@@ -105,40 +157,65 @@
 
             animate();
 
-            const interactiveElements = document.querySelectorAll('a, button, [role="button"]');
+            // Function to update interactive elements
+            function updateInteractiveElements() {
+                const interactiveElements = document.querySelectorAll('a, button, [role="button"], input, textarea, [contenteditable="true"]');
 
-            interactiveElements.forEach(el => {
-                const elH = el as HTMLElement;
-                elH.style.cursor = 'none';
+                interactiveElements.forEach(el => {
+                    const elH = el as HTMLElement;
 
-                el.addEventListener('mouseenter', () => {
-                    if (circle) {
-                        (circle as HTMLElement).style.width = '44px';
-                        (circle as HTMLElement).style.height = '44px';
-                    }
+                    // Skip if already processed
+                    if (elH.dataset.cursorProcessed) return;
+                    elH.dataset.cursorProcessed = 'true';
+
+                    elH.style.cursor = 'none';
+
+                    el.addEventListener('mouseenter', () => {
+                        if (circle) {
+                            (circle as HTMLElement).style.width = '44px';
+                            (circle as HTMLElement).style.height = '44px';
+                        }
+                    });
+
+                    el.addEventListener('mouseleave', () => {
+                        if (circle) {
+                            (circle as HTMLElement).style.width = '28px';
+                            (circle as HTMLElement).style.height = '28px';
+                        }
+                    });
+
+                    el.addEventListener('mousemove', () => {
+                        const rect = el.getBoundingClientRect();
+                        const centerX = rect.left + rect.width / 2;
+                        const centerY = rect.top + rect.height / 2;
+
+                        const distance = Math.sqrt(
+                            Math.pow(mouseX - centerX, 2) + Math.pow(mouseY - centerY, 2)
+                        );
+
+                        if (distance < 80) {
+                            const pullStrength = 0.6;
+                            mouseX += (centerX - mouseX) * pullStrength;
+                            mouseY += (centerY - mouseY) * pullStrength;
+                        }
+                    });
                 });
+            }
 
-                el.addEventListener('mouseleave', () => {
-                    if (circle) {
-                        (circle as HTMLElement).style.width = '28px';
-                        (circle as HTMLElement).style.height = '28px';
-                    }
-                });
+            // Initial update
+            updateInteractiveElements();
 
-                el.addEventListener('mousemove', () => {
-                    const rect = el.getBoundingClientRect();
-                    const centerX = rect.left + rect.width / 2;
-                    const centerY = rect.top + rect.height / 2;
+            // Debounce mutation observer updates
+            let mutationTimeout: NodeJS.Timeout;
+            const observer = new MutationObserver(() => {
+                clearTimeout(mutationTimeout);
+                mutationTimeout = setTimeout(() => {
+                    updateInteractiveElements();
+                }, 500);
+            });
 
-                    const distance = Math.sqrt(
-                        Math.pow(mouseX - centerX, 2) + Math.pow(mouseY - centerY, 2)
-                    );
-
-                    if (distance < 80) {
-                        const pullStrength = 0.6;
-                        mouseX += (centerX - mouseX) * pullStrength;
-                        mouseY += (centerY - mouseY) * pullStrength;
-                    }
-                });
+            observer.observe(document.body, {
+                childList: true,
+                subtree: true
             });
         </script>

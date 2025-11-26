@@ -1,0 +1,131 @@
+.windowLayer {
+  position: relative;
+  width: 100%;
+  min-height: 100vh;
+}
+
+.windowsContainer {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  padding: 80px 40px 140px;
+}
+
+.window {
+  position: absolute;
+  border-radius: 16px;
+  font-family: Inter, sans-serif;
+  background: rgba(255, 255, 255, 0.98);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow:
+    0 12px 48px rgba(0, 0, 0, 0.12),
+    0 4px 16px rgba(0, 0, 0, 0.08);
+  backdrop-filter: blur(20px);
+  overflow: hidden;
+  animation: windowOpen 300ms cubic-bezier(0.4, 0, 0.2, 1);
+  transform-origin: center;
+}
+
+.windowFocused {
+  transform: scale(1.02);
+  box-shadow:
+    0 16px 54px rgba(0, 0, 0, 0.18),
+    0 6px 24px rgba(0, 0, 0, 0.12);
+}
+
+.windowHeader {
+  font-family: Inter, sans-serif;
+    font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 48px;
+  padding: 12px 16px;
+  background: rgba(82, 217, 154, 0.03);
+  cursor: none;
+  user-select: none;
+}
+
+.windowHeader.dragging,
+body.window-dragging .windowHeader {
+  cursor: grabbing !important;
+}
+
+.headerLeft {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  pointer-events: none;
+}
+
+.windowIndicator {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.windowTitle {
+  font-family: Inter, sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  color: #1a1a1a;
+}
+
+.headerRight {
+  display: flex;
+  gap: 8px;
+  pointer-events: auto;
+}
+
+.closeButton,
+.minimizeButton {
+  width: 24px;
+  height: 24px;
+  border-radius: 12px;
+  border: none;
+  background: transparent;
+  color: #1a1a1a;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background 0.2s ease, color 0.2s ease;
+  pointer-events: auto;
+}
+
+.closeButton:hover,
+.minimizeButton:hover {
+  background: rgba(0, 0, 0, 0.05);
+}
+
+.windowContent {
+  padding: 16px;
+  height: calc(100% - 48px);
+  overflow: auto;
+}
+
+@media (max-width: 1023px) {
+  .windowsContainer {
+    padding: 72px 24px 120px;
+  }
+}
+
+@media (max-width: 767px) {
+  .windowsContainer {
+    padding: 100px 16px 120px;
+  }
+
+  .window {
+    position: relative !important;
+    left: auto !important;
+    top: auto !important;
+    width: 100% !important;
+    max-width: 100% !important;
+    height: auto !important;
+    margin-bottom: 20px;
+    transform: none !important;
+  }
+
+  .window.windowFocused {
+    transform: none !important;
+  }
+}
+

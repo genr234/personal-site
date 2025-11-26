@@ -1,0 +1,44 @@
+@keyframes windowOpen {
+  from {
+    opacity: 0;
+    transform: scale(0.9) translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes windowClose {
+  from {
+    opacity: 1;
+    transform: scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+}
+
+@keyframes windowMinimize {
+  from {
+    opacity: 1;
+    transform: translate(var(--start-x), var(--start-y)) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translate(var(--end-x), var(--end-y)) scale(0.1);
+  }
+}
+
+@keyframes windowRestore {
+  from {
+    opacity: 0;
+    transform: translate(var(--start-x), var(--start-y)) scale(0.1);
+  }
+  to {
+    opacity: 1;
+    transform: translate(var(--end-x), var(--end-y)) scale(1);
+  }
+}
+
