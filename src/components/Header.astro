@@ -1,16 +1,16 @@
 ---
 // Header.astro
 interface Props {
-    currentPath?: string;
-    centerText?: string;
+	currentPath?: string;
+	centerText?: string;
 }
 
-const { currentPath = '/', centerText = '' } = Astro.props;
+const { currentPath = "/", centerText = "" } = Astro.props;
 
 const navItems = [
-    { label: 'Blog', href: '/blog' },
-    { label: 'About', href: '/about' },
-    { label: 'Contact', href: '/contact' }
+	{ label: "Blog", href: "/blog" },
+	{ label: "About", href: "/about" },
+	{ label: "Contact", href: "/contact" },
 ];
 ---
 
@@ -81,7 +81,7 @@ const navItems = [
 <header class="site-header">
     <div class="header-container">
         <div class="header-name">
-            <a href="/" class="name-link">
+            <a href={currentPath === '/' ? undefined : "/"} class="name-link">
                 genr234
             </a>
         </div>

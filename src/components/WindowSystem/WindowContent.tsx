@@ -1,14 +1,14 @@
-import {MusicWindow} from "../windows/MusicWindow.tsx";
+import { MusicWindow } from "../windows/MusicWindow.tsx";
 import type { JSX } from "preact";
 
 interface Props {
-  windowId: string;
+	windowId: string;
 }
 
 const contentMap: Record<string, JSX.Element> = {
-    music: <MusicWindow />
-}
+	music: <MusicWindow />,
+};
 
 export default function WindowContent({ windowId }: Props) {
-    return contentMap[windowId] || <div>No content available</div>;
+	return contentMap[windowId] || <div>No content available</div>;
 }

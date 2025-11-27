@@ -1,24 +1,25 @@
 {
-  "name": "genr235",
-  "type": "module",
-  "version": "0.0.1",
-  "scripts": {
-    "dev": "astro dev",
-    "build": "astro build",
-    "preview": "astro preview",
-    "astro": "astro",
-    "test": "vitest"
-  },
-  "dependencies": {
-    "@preact/signals": "^2.5.1",
-    "astro": "5.15.6",
-    "clsx": "^2.1.1",
-    "preact": "^10.25.0",
-    "preact-render-to-string": "^6.0.0",
-    "sass": "^1.94.2"
-  },
-  "devDependencies": {
-    "@astrojs/preact": "^4.0.8",
-    "vitest": "3.0.5"
-  }
+	"name": "genr235",
+	"type": "module",
+	"version": "0.0.1",
+	"scripts": {
+		"dev": "astro dev",
+		"build": "astro build",
+		"preview": "astro preview",
+		"astro": "astro",
+		"test": "vitest"
+	},
+	"dependencies": {
+		"@preact/signals": "^2.5.1",
+		"astro": "5.15.6",
+		"clsx": "^2.1.1",
+		"lucide-preact": "^0.555.0",
+		"preact": "^10.25.0",
+		"preact-render-to-string": "^6.0.0",
+		"sass": "^1.94.2"
+	},
+	"devDependencies": {
+		"@astrojs/preact": "^4.0.8",
+		"vitest": "3.0.5"
+	}
 }

@@ -10,6 +10,9 @@ dependencies:
   clsx:
     specifier: ^2.1.1
     version: 2.1.1
+  lucide-preact:
+    specifier: ^0.555.0
+    version: 0.555.0(preact@10.25.0)
   preact:
     specifier: ^10.25.0
     version: 10.25.0
@@ -2222,6 +2225,14 @@ packages:
     dependencies:
       yallist: 3.1.1
     dev: true
+
+  /lucide-preact@0.555.0(preact@10.25.0):
+    resolution: {integrity: sha512-NcVrZL6iMRNhEXrqDRGFLL6fL5shDKc2v3wSazuG/E973qf/0zCSfHxUqk8f5oNrUgrPjUUnOZeQneVfaej5aw==}
+    peerDependencies:
+      preact: ^10.5.13
+    dependencies:
+      preact: 10.25.0
+    dev: false
 
   /magic-string@0.30.21:
     resolution: {integrity: sha512-vd2F4YUyEXKGcLHoq+TEyCjxueSeHnFxyyjNp80yg0XV4vUhnDer/lvvlqM/arB5bXQN5K2/3oinyCRyx8T2CQ==}

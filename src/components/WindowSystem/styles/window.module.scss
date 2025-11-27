@@ -2,6 +2,7 @@
   position: relative;
   width: 100%;
   min-height: 100vh;
+  overflow: hidden;
 }
 
 .windowsContainer {
@@ -125,7 +126,37 @@ body.window-dragging .windowHeader {
   }
 
   .window.windowFocused {
-    transform: none !important;
+  transform: none !important;
+  }
+}
+
+.windowSeamless {
+  background: var(--header-bg, #5626a1);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+
+  :global(.windowHeader) {
+  }
+}
+
+.windowContentSeamless {
+  padding: 0;
+}
+
+.headerSeamless {
+  background: var(--header-bg, #5626a1);
+  color: var(--header-text, #fff);
+
+  .windowTitle {
+    color: var(--header-text, #fff);
+  }
+  
+  .closeButton,
+  .minimizeButton {
+    color: var(--header-text, #fff);
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.1);
+    }
   }
 }
 
