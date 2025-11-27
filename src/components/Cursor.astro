@@ -1,9 +1,21 @@
 ---
+
 ---
 
-        <div id="cursor-dot" class="cursor-element"></div>
-        <div id="cursor-circle" class="cursor-element"></div>
-        <div id="cursor-glow" class="cursor-element"></div>
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        if (document.body.classList.contains('mobile-window-mode')) {
+            const cursorElements = document.querySelectorAll('.cursor-element');
+            cursorElements.forEach(el => el.remove());
+            document.body.style.cursor = 'auto';
+        }
+    })
+
+</script>
+
+<div id="cursor"><div id="cursor-dot" class="cursor-element"></div>
+    <div id="cursor-circle" class="cursor-element"></div>
+    <div id="cursor-glow" class="cursor-element"></div></div>
 
         <style>
             .cursor-element {

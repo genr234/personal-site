@@ -1,3 +1,5 @@
+import type {LucideIcon} from "lucide-preact";
+
 export interface Position {
 	x: number;
 	y: number;
