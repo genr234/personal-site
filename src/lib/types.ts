@@ -23,6 +23,7 @@ export interface WindowConfig {
 	variant?: "default" | "seamless";
 	headerBackground?: string;
 	headerTextColor?: string;
+    shownByDefault?: boolean;
 }
 
 export interface WindowState extends WindowConfig {

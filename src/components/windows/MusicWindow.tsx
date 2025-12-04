@@ -182,6 +182,9 @@ export function MusicWindow() {
 			duration > 0 && Number.isFinite(duration)
 				? (current / duration) * 100
 				: 0;
+        if (percent == 100) {
+            nextTrack();
+        }
 		const clamped = Number.isFinite(percent)
 			? Math.max(0, Math.min(100, percent))
 			: 0;

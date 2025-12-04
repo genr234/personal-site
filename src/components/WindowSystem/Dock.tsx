@@ -1,7 +1,11 @@
 import { useState } from "preact/hooks";
 import { DockItem } from "./DockItem";
 import styles from "./styles/dock.module.scss";
-import type { WindowConfig, WindowState } from "../../lib/types";
+import type { WindowConfig, WindowState, DockItemConfig } from "../../lib/types";
+
+interface DockEntry extends DockItemConfig {
+	shownByDefault?: boolean;
+}
 
 interface DockProps {
 	appItems: WindowConfig[];
@@ -23,7 +27,7 @@ export function Dock({ appItems, minimizedWindows, onItemClick }: DockProps) {
 		return 1;
 	};
 
-	const items = [
+	const items: DockEntry[] = [
 		...appItems.map((app) => ({
 			id: app.id,
 			type: "app" as const,
@@ -32,11 +36,12 @@ export function Dock({ appItems, minimizedWindows, onItemClick }: DockProps) {
 			color: app.color,
 			onClick: () => onItemClick(app.id),
 			isActive: false,
+			shownByDefault: app.shownByDefault ?? true,
 		})),
 		...minimizedWindows.map((window) => ({
 			id: window.id,
 			type: "minimized-window" as const,
-			icon: "📄",
+			icon: "File",
 			label: window.title,
 			color: window.color,
 			onClick: () => onItemClick(window.id),
@@ -48,11 +53,11 @@ export function Dock({ appItems, minimizedWindows, onItemClick }: DockProps) {
 		<nav class={styles.dock} aria-label="Application dock">
 			<div class={styles.dockInner}>
 				{items.map((item, index) => {
-					const { type, ...itemProps } = item;
+					if (item.shownByDefault === false) return null;
 					return (
 						<DockItem
 							key={item.id}
-							{...itemProps}
+							{...item}
 							scale={getScale(index)}
 							onMouseEnter={() => setHoveredIndex(index)}
 							onMouseLeave={() => setHoveredIndex(null)}

@@ -134,7 +134,6 @@ export function Window({ windowState }: Props) {
 		>
 			<WindowHeader
 				id={id}
-				title={title}
 				icon={icon}
 				color={color}
 				onClose={() => closeWindow(id)}

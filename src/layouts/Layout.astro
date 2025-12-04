@@ -1,6 +1,5 @@
 ---
 import Header from "../components/Header.astro";
-import { WindowManager } from "../components/WindowSystem/WindowManager";
 import Cursor from "../components/Cursor.astro";
 ---
 <!doctype html>
@@ -11,11 +10,13 @@ import Cursor from "../components/Cursor.astro";
 		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
         <link rel="preconnect" href="https://rsms.me/">
         <link rel="stylesheet" href="https://rsms.me/inter/inter.css">
-        <script data-collect-dnt="true" async src="https://scripts.simpleanalyticscdn.com/latest.js"></script>
+        <script data-collect-dnt="true" async src="https://scripts.simpleanalyticscdn.com/latest.js" is:inline></script>
         <meta name="generator" content={Astro.generator} />
-		<title>Astro Basics</title>
+        <script src="../lib/background.ts" />
+        <title>Astro Basics</title>
 	</head>
 	<body>
+    <canvas id="shader"></canvas>
     <Cursor />
     <Header centerText="" currentPath={Astro.url.pathname} />
     <slot />
@@ -28,13 +29,18 @@ import Cursor from "../components/Cursor.astro";
 		margin: 0;
 		width: 100%;
 		height: 100%;
-		background-color: #CCCCFF;
       ::selection {
         background: rgba(100, 100, 255, 0.3);
         opacity: 0.1;
       }
       .mobile-window-mode {
         padding-bottom: 100px;
+      }
+
+      > #shader {
+        position: fixed;
+        width: 100vw;
+        height: 100vh;
       }
 	}
 

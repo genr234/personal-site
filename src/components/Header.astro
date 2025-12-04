@@ -1,5 +1,8 @@
 ---
 // Header.astro
+
+import NavItem from "./NavItem.tsx";
+
 interface Props {
 	currentPath?: string;
 	centerText?: string;
@@ -8,13 +11,17 @@ interface Props {
 const { currentPath = "/", centerText = "" } = Astro.props;
 
 const navItems = [
-	{ label: "Blog", href: "/blog" },
-	{ label: "About", href: "/about" },
-	{ label: "Contact", href: "/contact" },
+	{ label: "Blog", windowName: "blog" },
+	{ label: "About", windowName: "about" },
+	{ label: "Contact", windowName: "contact" },
 ];
+
 ---
 
 <script is:inline>
+    import {createWindow} from "../lib/windowManager.ts";
+    import {defaultWindowConfigs} from "../lib/windowConfigs.ts";
+
     const CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
     const activeAnimations = new WeakMap();
 
@@ -81,9 +88,9 @@ const navItems = [
 <header class="site-header">
     <div class="header-container">
         <div class="header-name">
-            <a href={currentPath === '/' ? undefined : "/"} class="name-link">
+            <div class="name">
                 genr234
-            </a>
+            </div>
         </div>
 
         <span class="header-center">
@@ -92,24 +99,26 @@ const navItems = [
 
         <nav class="header-nav">
             {navItems.map(item => (
-                    <a
-                            href={item.href}
-                            class:list={['nav-item', { active: currentPath === item.href }]}
-                    >
-                        {item.label}
-                    </a>
+                    <NavItem
+                            label={item.label}
+                            windowName={item.windowName}
+                            client:load
+                    />
             ))}
         </nav>
     </div>
 </header>
 
-<style>
+<style lang="scss">
     .site-header {
         position: fixed;
         top: 0;
         left: 0;
         right: 0;
         z-index: 1000;
+        background: transparent;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
     }
 
     .header-container {
@@ -119,80 +128,53 @@ const navItems = [
         padding: 12px 20px;
         max-width: 100%;
         font-family: Gentle, sans-serif;
+        background: transparent;
     }
 
     .header-name {
         justify-self: start;
+        mix-blend-mode: normal;
     }
 
-    .name-link {
+    .name {
         text-decoration: none;
         font-family: Nano, sans-serif;
         font-size: 1.125rem;
         font-weight: 400;
         display: inline-block;
         letter-spacing: 0.01em;
-        color: #0D0D0D;
+        color: #ffffff;
+        mix-blend-mode: difference;
+        -webkit-text-fill-color: currentColor;
+        position: relative;
+        z-index: auto;
     }
 
-
-    .name-link:hover {
-        animation: rotate-wave 0.6s ease-in-out;
-    }
-
-    @keyframes rotate-wave {
-        0%, 100% {
-            transform: rotate(0deg);
-        }
-        50% {
-            transform: rotate(8deg);
-        }
-    }
-
-    .header-center {
-        justify-self: center;
-        color: #0D0D0D;
-        font-family: Cutta, sans-serif;
-        font-size: 0.9375rem;
-        letter-spacing: 0.01em;
+    .header-center,
+    .header-nav {
+        mix-blend-mode: normal;
     }
 
     .header-nav {
+        /* keep nav container layout scoped */
         justify-self: end;
         display: flex;
         gap: 2rem;
-    }
-
-    .nav-item {
-        text-decoration: none;
-        color: #0D0D0D;
-        font-size: 0.9375rem;
         position: relative;
-        transition: opacity 0.2s ease;
-        opacity: 0.4;
-        letter-spacing: 0.01em;
-        font-variant-numeric: tabular-nums;
-        display: inline-block;
-        width: fit-content;
+        z-index: 1010; /* sit above background canvas but below cursor (9999) */
     }
 
-    .nav-item.active {
-        opacity: 1;
+    .header-nav :global(*) {
+        mix-blend-mode: normal !important;
     }
 
-    .nav-item.active::after {
-        content: '';
-        position: absolute;
-        bottom: -2px;
-        left: 0;
-        right: 0;
-        height: 1px;
-        background: black;
+    .header-nav > * {
+        mix-blend-mode: normal !important;
+       color: #0d0d0d !important;
+       opacity: 0.9 !important;
+      position: relative;
     }
 
-    .nav-item:hover {
-        opacity: 1;
-    }
 
     @media (max-width: 768px) {
         .header-container {

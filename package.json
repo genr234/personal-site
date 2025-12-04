@@ -16,10 +16,12 @@
 		"lucide-preact": "^0.555.0",
 		"preact": "^10.25.0",
 		"preact-render-to-string": "^6.0.0",
-		"sass": "^1.94.2"
+		"sass": "^1.94.2",
+		"three": "^0.181.2"
 	},
 	"devDependencies": {
 		"@astrojs/preact": "^4.0.8",
+		"@types/three": "^0.181.0",
 		"vitest": "3.0.5"
 	}
 }

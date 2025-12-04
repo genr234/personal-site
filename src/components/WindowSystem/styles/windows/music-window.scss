@@ -522,8 +522,7 @@
      linear-gradient(90deg, #6F4FF2 0%, #6F4FF2 17%, #5BA9F9 17%, #5BA9F9 34%, #89F84B 34%, #89F84B 50%, #FEFD52 50%, #FEFD52 67%, #EEAC3D 67%, #EEAC3D 83%, #E44229 83%, #E44229 100%),
      linear-gradient(90deg, rgba(255,255,255,0.08), rgba(255,255,255,0.08));
    background-repeat: no-repeat, no-repeat;
-   /* extend progress slightly (so the thumb stays over the colored gradient at the end) but never exceed 100% */
-   background-size: min(calc(var(--seek-percent) + 3%), 100%) 100%, 100% 100%;
+   background-size: min(calc(var(--seek-percent)), 100%) 100%, 100% 100%;
   }
 
   .seek-slider::-webkit-slider-thumb {

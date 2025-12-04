@@ -2,7 +2,6 @@ import styles from "./styles/window.module.scss";
 
 interface WindowHeaderProps {
 	id: string;
-	title: string;
 	color: string;
 	icon: string;
 	onClose: () => void;
@@ -16,7 +15,6 @@ interface WindowHeaderProps {
 
 export function WindowHeader({
 	id,
-	title,
 	color,
 	icon,
 	onClose,
@@ -48,13 +46,6 @@ export function WindowHeader({
 			onMouseDown={onMouseDown}
 		>
 			<div class={styles.headerLeft}>
-				<span
-					class={styles.windowIndicator}
-					style={{ backgroundColor: color }}
-				/>
-				<span id={`window-title-${id}`} class={styles.windowTitle}>
-					{title}
-				</span>
 			</div>
 			<div class={styles.headerRight}>
 				<button

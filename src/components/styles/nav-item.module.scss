@@ -1,0 +1,50 @@
+.navItem {
+	text-decoration: none !important; /* force no underline */
+	color: #0d0d0d;
+	font-size: 0.9375rem;
+	position: relative;
+	transition: opacity 0.2s ease, color 0.15s ease;
+	opacity: 0.4;
+	letter-spacing: 0.01em;
+	font-variant-numeric: tabular-nums;
+	display: inline-block;
+	width: fit-content;
+	cursor: pointer;
+
+	&::after {
+		content: '';
+		position: absolute;
+		bottom: -3px; /* slightly more space */
+		left: 0;
+		right: 0;
+		height: 2px; /* thicker line when visible */
+		background: currentColor;
+		transform-origin: center;
+		transform: scaleX(0);
+		opacity: 0;
+		transition: transform 0.18s ease, opacity 0.18s ease;
+		pointer-events: none;
+	}
+
+	&:hover {
+		opacity: 1;
+		&::after {
+			transform: scaleX(1);
+			opacity: 1;
+		}
+	}
+}
+
+/* exported active class so styles.active exists in the module */
+.active {
+	text-decoration: none !important;
+	opacity: 1;
+	color: #111; /* rendi il testo più scuro quando attivo */
+	font-weight: 600;
+	&::after {
+		transform: scaleX(1);
+		opacity: 1;
+		background: #111; /* active underline color */
+		height: 2px;
+	}
+}
