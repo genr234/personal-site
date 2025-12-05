@@ -78,19 +78,28 @@ export function MusicWindow() {
 	};
 
 	const handleVinylClick = (playlistIdx: number, trackIdx: number) => {
-		// If it's already playing, do nothing or pause? Let's just select it if different
-		if (playlistIdx === currentPlaylistIdx && trackIdx === currentTrackIdx) {
-			return;
-		}
+		// Check if touch device
+		const isTouchDevice = () => {
+			return (
+				window.matchMedia("(pointer:coarse)").matches ||
+				window.matchMedia("(hover:none)").matches
+			);
+		};
 
-		// Toggle selection
-		if (
-			selectedVinyl?.playlistIdx === playlistIdx &&
-			selectedVinyl?.trackIdx === trackIdx
-		) {
-			setSelectedVinyl(null); // Deselect
+		// On touch devices, directly play the track
+		if (isTouchDevice()) {
+			changeTrack(playlistIdx, trackIdx);
+			setShowPlaylist(false);
 		} else {
-			setSelectedVinyl({ playlistIdx, trackIdx });
+			// On desktop, use selection for drag-and-drop
+			if (
+				selectedVinyl?.playlistIdx === playlistIdx &&
+				selectedVinyl?.trackIdx === trackIdx
+			) {
+				setSelectedVinyl(null); // Deselect
+			} else {
+				setSelectedVinyl({ playlistIdx, trackIdx });
+			}
 		}
 	};
 
@@ -137,6 +146,8 @@ export function MusicWindow() {
 			}
 		}
 	};
+
+
 
 	useEffect(() => {
 		if (audioRef.current) {
