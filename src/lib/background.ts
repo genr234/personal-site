@@ -270,6 +270,7 @@ function adjustResolution(averageFPS: number) {
 }
 
 
+let scrollProgress = 0;
 
 function render(timeMs: number) {
     measureFPS(timeMs);
@@ -283,12 +284,12 @@ function render(timeMs: number) {
     uniformsA.iTime.value = timeSeconds;
     uniformsB.iTime.value = timeSeconds;
 
-    let t = NaN;
+    // Movimento lento basato sul tempo invece del mouse
+    scrollProgress = (timeSeconds * 0.2) % 2.0; // Ciclo ogni 10 secondi
+    const slowMovementX = Math.sin(timeSeconds * 0.3) * 200;
+    const slowMovementY = Math.cos(timeSeconds * 0.25) * 200;
 
-    lerpedMouseX = lerp(lerpedMouseX, actualMouseX, MOUSE_REACTIVITY);
-    lerpedMouseY = lerp(lerpedMouseY, actualMouseY, MOUSE_REACTIVITY);
-
-    uniformsA.iMouse.value.set(lerpedMouseX, lerpedMouseY, 0, 0);
+    uniformsA.iMouse.value.set(slowMovementX, slowMovementY, 0, 0);
 
     // Pass A -> rtA
     renderer.setRenderTarget(rtA);
