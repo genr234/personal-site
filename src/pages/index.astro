@@ -1,7 +1,7 @@
 ---
-import Cursor from "../components/Cursor.astro";
 import Layout from "../layouts/Layout.astro";
 import { WindowManager } from "../components/WindowSystem/WindowManager.tsx";
+import { TutorialDialogue } from "../components/Tutorial/TutorialDialogue.tsx";
 ---
 
 <Layout>
@@ -15,4 +15,24 @@ import { WindowManager } from "../components/WindowSystem/WindowManager.tsx";
         })
     </script>
     <WindowManager client:load />
+    <TutorialDialogue client:load steps={[
+                      {
+                          text: "Hey there! Welcome to my little corner of the internet!",
+                      },
+                      {
+                          text: "Up here is the navigation. You can click these to open different sections of the site.",
+                          target: "header-nav",
+                      },
+                      {
+                          text: "This is the dock! It's like a launchpad for all the cool stuff. Try clicking an icon to open a window.",
+                          target: "dock",
+                          },
+                      {
+                          text: "Windows can be dragged around and resized. Feel free to arrange things however you like!",
+                      },
+                      {
+                          text: "That's it! Have fun exploring. You can always find me if you need help. See ya!",
+                      }
+    ]}
+    />
 </Layout>

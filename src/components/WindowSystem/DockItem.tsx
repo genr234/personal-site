@@ -1,17 +1,15 @@
 import styles from "./styles/dock.module.scss";
 import type { DockItemConfig } from "../../lib/types";
-import {icons} from "lucide-preact";
+import {icons, type LucideIcon} from "lucide-preact";
 
 interface DockItemProps extends DockItemConfig {
 	scale: number;
 	onMouseEnter?: () => void;
 	onMouseLeave?: () => void;
+    icon: keyof typeof icons;
 }
 
-
-
 export function DockItem({
-	id,
 	icon,
 	label,
 	color,

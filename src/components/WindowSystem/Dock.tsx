@@ -1,7 +1,11 @@
 import { useState } from "preact/hooks";
+import type {
+	DockItemConfig,
+	WindowConfig,
+	WindowState,
+} from "../../lib/types";
 import { DockItem } from "./DockItem";
 import styles from "./styles/dock.module.scss";
-import type { WindowConfig, WindowState, DockItemConfig } from "../../lib/types";
 
 interface DockEntry extends DockItemConfig {
 	shownByDefault?: boolean;
@@ -50,7 +54,7 @@ export function Dock({ appItems, minimizedWindows, onItemClick }: DockProps) {
 	];
 
 	return (
-		<nav class={styles.dock} aria-label="Application dock">
+		<nav class={styles.dock} aria-label="Application dock" data-tutorial="dock">
 			<div class={styles.dockInner}>
 				{items.map((item, index) => {
 					if (item.shownByDefault === false) return null;

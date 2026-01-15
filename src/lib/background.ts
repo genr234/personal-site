@@ -391,10 +391,12 @@ export function setPaletteImmediate(index: number): void {
 	uniformsA.iMorphProgress.value = 0;
 }
 
-export function randomPalette(): void {
+export function randomPalette(immediate?: boolean): void {
 	let randomIndex = Math.floor(Math.random() * PALETTE_COUNT);
 	if (randomIndex === targetPalette) {
 		randomIndex = (randomIndex + 1) % PALETTE_COUNT;
 	}
-	setPalette(randomIndex);
+    if (immediate) {
+        setPaletteImmediate(randomIndex);
+    } else setPalette(randomIndex);
 }
