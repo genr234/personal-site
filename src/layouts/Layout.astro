@@ -1,6 +1,5 @@
 ---
 import Header from "../components/Header.astro";
-import Cursor from "../components/Cursor.astro";
 ---
 <!doctype html>
 <html lang="en">
@@ -17,7 +16,6 @@ import Cursor from "../components/Cursor.astro";
 	</head>
 	<body>
     <canvas id="shader"></canvas>
-    <Cursor />
     <Header centerText="" currentPath={Astro.url.pathname} />
     <slot />
 	</body>

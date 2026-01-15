@@ -2,13 +2,13 @@ import { useCallback, useEffect, useRef, useState } from "preact/hooks";
 import styles from "./styles/tutorial.module.scss";
 
 export interface TutorialStep {
-    id: string;
-    /** message */
-    text: string;
-    /** target element selector */
-    target?: string;
-    /** callback when step becomes active */
-    onEnter?: () => void;
+	id: string;
+	/** message */
+	text: string;
+	/** target element selector */
+	target?: string;
+	/** callback when step becomes active */
+	onEnter?: () => void;
 }
 
 interface TutorialDialogueProps {
@@ -409,21 +409,29 @@ export function TutorialDialogue({
 
 	return (
 		<>
-			{/* biome-ignore lint/a11y/useSemanticElements: full-viewport overlay */}
-			<div
-				class={styles.overlay}
-				onClick={handleNext}
-				onKeyDown={(e) => e.key === "Enter" && handleNext()}
-				role="button"
-				tabIndex={-1}
-				aria-label="Continue"
-			/>
+			{/* Only block interaction when we have a highlight target. */}
+			{spotlight && (
+				// biome-ignore lint/a11y/useSemanticElements: full-viewport overlay
+				<div
+					class={styles.overlay}
+					onClick={handleNext}
+					onKeyDown={(e) => e.key === "Enter" && handleNext()}
+					role="button"
+					tabIndex={-1}
+					aria-label="Continue"
+				/>
+			)}
 
 			{spotlight && (
 				<>
 					<div class={styles.spotlightMask} />
 					<div
 						class={styles.spotlightHitbox}
+						onClick={handleNext}
+						onKeyDown={(e) => e.key === "Enter" && handleNext()}
+						role="button"
+						tabIndex={-1}
+						aria-label="Continue"
 						style={{
 							top: `${spotlight.top}px`,
 							left: `${spotlight.left}px`,
