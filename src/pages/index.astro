@@ -5,5 +5,14 @@ import { WindowManager } from "../components/WindowSystem/WindowManager.tsx";
 ---
 
 <Layout>
+    <script>
+        import {randomPalette} from "../lib/background.ts";
+
+        document.addEventListener("keydown", (e) => {
+            if (e.key === "Shift") {
+                randomPalette();
+            }
+        })
+    </script>
     <WindowManager client:load />
 </Layout>

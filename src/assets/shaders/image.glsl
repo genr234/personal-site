@@ -7,20 +7,18 @@
 // Bloom based on Xor's 1-pass blur: https://github.com/XorDev/1PassBlur
 //
 
-const float BLOOM_RADIUS  = 16.0; // Bloom radius in pixels
-const float BLOOM_BASE    = 0.55; // Bloom base brightness
-const float BLOOM_GLOW    = 2.50; // Bloom glow brightness
+const float BLOOM_RADIUS  = 20.0;  // Slightly larger for softer falloff
+const float BLOOM_BASE    = 0.65;  // Higher base for less aggressive bloom
+const float BLOOM_GLOW    = 1.8;   // Reduced intensity for subtlety
 
 uniform float iScrollProgress;
 
 void mainImage(out vec4 out_fragColor, in vec2 fragCoord) {
-    //float t = min(1.00, iTime / 10.0);
     float t = min(1.00, iScrollProgress);
 
     float bloomBase = mix(1.00, BLOOM_BASE, t);
     float bloomGlow = mix(0.00, BLOOM_GLOW, t);
 
-    // Resolution and texel size
     vec2 res = iResolution.xy;
     vec2 texel = 1.0 / res;
 
@@ -28,18 +26,23 @@ void mainImage(out vec4 out_fragColor, in vec2 fragCoord) {
     vec2 point = vec2(BLOOM_RADIUS, 0) * inversesqrt(BLOOM_SAMPLES);
 
     for (float i = 0.0; i < BLOOM_SAMPLES; i++) {
-        // Rotate by golden angle
+        // Rotate by golden angle for even distribution
         point *= -mat2(0.7374, 0.6755, -0.6755, 0.7374);
 
-        // Compute sample coordinates from rotated sample point
+        // Compute sample coordinates
         vec2 coord = (fragCoord + point * sqrt(i)) * texel;
 
-        // Add bloom samples
-        bloom += texture(iChannel0, coord) * (1.0 - i / BLOOM_SAMPLES);
+        // Softer falloff weight
+        float weight = 1.0 - pow(i / BLOOM_SAMPLES, 0.8);
+        bloom += texture(iChannel0, coord) * weight;
     }
 
     bloom *= bloomGlow / BLOOM_SAMPLES;
     bloom += texture(iChannel0, fragCoord / res) * bloomBase;
+
+    // Gentle tone mapping for smoother result
+    bloom.rgb = bloom.rgb / (bloom.rgb + 0.5);
+    bloom.rgb *= 1.5;
 
     out_fragColor = bloom;
 }
