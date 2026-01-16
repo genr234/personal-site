@@ -15,20 +15,29 @@ import { TutorialDialogue } from "../components/Tutorial/TutorialDialogue.tsx";
         })
     </script>
     <WindowManager client:load />
-    <TutorialDialogue client:load steps={[
+    <TutorialDialogue client:only="preact" steps={[
                       {
+                          id: "welcome",
                           text: "Hey there! Welcome to my little corner of the internet!",
                       },
                       {
+                          id: "header",
                           text: "Up here is the navigation. You can click these to open different sections of the site.",
                           target: "header-nav",
                       },
                       {
-                          text: "This is the dock!",
+                          id: "dock",
+                          text: "This is the dock! All kinds of cool apps live here. Definitely check them out.",
                           target: "dock",
-                          },
+                      },
                       {
-                          text: "That's it! Have fun exploring. You can always find me if you need help. See ya!",
+                          id: "palette",
+                          kind: "palette",
+                          text: "Change the background to something you like!",
+                      },
+                      {
+                          id: "done",
+                          text: "That's it! Have fun exploring. If you like this website send me a message to let me know (or just to say hi!) See ya!",
                       }
     ]}
     />

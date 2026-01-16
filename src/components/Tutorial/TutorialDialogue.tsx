@@ -1,4 +1,11 @@
-import { useCallback, useEffect, useRef, useState } from "preact/hooks";
+import {
+	useCallback,
+	useEffect,
+	useMemo,
+	useRef,
+	useState,
+} from "preact/hooks";
+import { setPalette, setPaletteImmediate } from "../../lib/background.ts";
 import styles from "./styles/tutorial.module.scss";
 
 export interface TutorialStep {
@@ -9,6 +16,8 @@ export interface TutorialStep {
 	target?: string;
 	/** callback when step becomes active */
 	onEnter?: () => void;
+	/** special step UI */
+	kind?: "palette";
 }
 
 interface TutorialDialogueProps {
@@ -31,6 +40,11 @@ interface Position {
 	y: number;
 	tailDir: TailDirection;
 	bongoOnRight: boolean;
+}
+
+interface LayoutSize {
+	width: number;
+	height: number;
 }
 
 const TYPEWRITER_SPEED = 26;
@@ -62,11 +76,34 @@ export function TutorialDialogue({
 		bongoOnRight: true,
 	});
 	const lastStablePositionRef = useRef<Position | null>(null);
+	const layoutSizeRef = useRef<LayoutSize>({ width: 0, height: 0 });
 	const [isMobile, setIsMobile] = useState(false);
 
 	const typewriterRef = useRef<number | null>(null);
 	const bongoIntervalRef = useRef<number | null>(null);
 	const currentStep = steps[currentStepIndex];
+
+	const palettes = [
+        {
+            colors: ["#0ea5e9", "#1d4ed8", "#0f172a"],
+        },
+        {
+            colors: ["#fb7185", "#f59e0b", "#7c3aed"],
+        },
+        {
+            colors: ["#22c55e", "#065f46", "#14532d"],
+        },
+        {
+            colors: ["#22d3ee", "#a78bfa", "#b7a967"],
+        },
+        {
+            colors: ["#00bafd", "#b900e5", "#00fdaf"],
+        },
+    ];
+
+	const [selectedPaletteIndex, setSelectedPaletteIndex] = useState<
+		number | null
+	>(null);
 
 	// filthy mobile users
 	useEffect(() => {
@@ -83,8 +120,14 @@ export function TutorialDialogue({
 
 			const bongoW = isMobile ? BONGO_SIZE_MOBILE : BONGO_SIZE;
 			const bubbleW = isMobile ? BUBBLE_WIDTH_MOBILE : BUBBLE_WIDTH;
-			const totalW = bongoW + bubbleW + 4;
-			const totalH = Math.max(bongoW, BUBBLE_HEIGHT);
+			const totalW =
+				layoutSizeRef.current.width > 0
+					? layoutSizeRef.current.width
+					: bongoW + bubbleW + 4;
+			const totalH =
+				layoutSizeRef.current.height > 0
+					? layoutSizeRef.current.height
+					: Math.max(bongoW, BUBBLE_HEIGHT);
 
 			const clamp = (v: number, min: number, max: number) =>
 				Math.max(min, Math.min(v, max));
@@ -95,17 +138,24 @@ export function TutorialDialogue({
 				x + totalW <= viewportW - MARGIN &&
 				y + totalH <= viewportH - MARGIN;
 
+			const clampToViewport = (x: number, y: number) => {
+				const minX = MARGIN;
+				const maxX = Math.max(MARGIN, viewportW - totalW - MARGIN);
+				const minY = MARGIN;
+				const maxY = Math.max(MARGIN, viewportH - totalH - MARGIN);
+				return {
+					x: clamp(x, minX, maxX),
+					y: clamp(y, minY, maxY),
+				};
+			};
+
+			const fallbackXY = clampToViewport(
+				viewportW - totalW - MARGIN,
+				viewportH - totalH - MARGIN - 60,
+			);
 			const fallback: Position = {
-				x: clamp(
-					viewportW - totalW - MARGIN,
-					MARGIN,
-					viewportW - totalW - MARGIN,
-				),
-				y: clamp(
-					viewportH - totalH - MARGIN - 60,
-					MARGIN,
-					viewportH - totalH - MARGIN,
-				),
+				x: fallbackXY.x,
+				y: fallbackXY.y,
 				tailDir: "right",
 				bongoOnRight: true,
 			};
@@ -187,8 +237,7 @@ export function TutorialDialogue({
 			const validCandidates = candidates
 				.map((c) => ({
 					...c,
-					x: clamp(c.x, MARGIN, viewportW - totalW - MARGIN),
-					y: clamp(c.y, MARGIN, viewportH - totalH - MARGIN),
+					...clampToViewport(c.x, c.y),
 				}))
 				.filter((c) => withinViewport(c.x, c.y))
 				.filter((c) => !overlapsHighlight(c.x, c.y));
@@ -255,6 +304,15 @@ export function TutorialDialogue({
 	}, [isVisible, spotlight, calculatePosition]);
 
 	useEffect(() => {
+		const saved = localStorage.getItem("palette");
+		if (saved != null) {
+			const idx = Number.parseInt(saved, 10);
+			if (!Number.isNaN(idx)) {
+				setSelectedPaletteIndex(idx);
+				setPaletteImmediate(idx);
+			}
+		}
+
 		if (forceShow) {
 			setIsVisible(true);
 			return;
@@ -291,6 +349,12 @@ export function TutorialDialogue({
 
 	useEffect(() => {
 		if (!isVisible || !currentStep) return;
+
+		if (currentStep.kind === "palette") {
+			setDisplayedText(currentStep.text);
+			setIsTyping(false);
+			return;
+		}
 
 		const fullText = currentStep.text;
 		setDisplayedText("");
@@ -378,6 +442,10 @@ export function TutorialDialogue({
 	}, [currentStep]);
 
 	const handleNext = useCallback(() => {
+		if (currentStep.kind === "palette" && selectedPaletteIndex == null) {
+			return;
+		}
+
 		if (isTyping) {
 			if (typewriterRef.current) clearTimeout(typewriterRef.current);
 			setDisplayedText(currentStep.text);
@@ -387,7 +455,20 @@ export function TutorialDialogue({
 		} else {
 			closeTutorial();
 		}
-	}, [isTyping, currentStepIndex, steps.length, currentStep, closeTutorial]);
+	}, [
+		isTyping,
+		currentStepIndex,
+		steps.length,
+		currentStep,
+		closeTutorial,
+		selectedPaletteIndex,
+	]);
+
+	const choosePalette = useCallback((index: number) => {
+		setSelectedPaletteIndex(index);
+		localStorage.setItem("palette", String(index));
+		setPalette(index);
+	}, []);
 
 	const handleBack = useCallback(() => {
 		if (currentStepIndex > 0) setCurrentStepIndex((p) => p - 1);
@@ -397,6 +478,36 @@ export function TutorialDialogue({
 
 	const isLastStep = currentStepIndex === steps.length - 1;
 	const isFirstStep = currentStepIndex === 0;
+
+	useEffect(() => {
+		if (!isVisible) return;
+
+		const measureAndReposition = () => {
+			const el = document.querySelector(
+				`[data-tutorial-bongo-container]`,
+			) as HTMLElement | null;
+			if (!el) return;
+
+			const rect = el.getBoundingClientRect();
+			layoutSizeRef.current = { width: rect.width, height: rect.height };
+			calculatePosition(spotlight);
+		};
+
+		let raf1 = window.requestAnimationFrame(() => {
+			raf1 = window.requestAnimationFrame(measureAndReposition);
+		});
+
+		return () => {
+			window.cancelAnimationFrame(raf1);
+		};
+	}, [
+		isVisible,
+		currentStepIndex,
+		isMobile,
+		selectedPaletteIndex,
+		spotlight,
+		calculatePosition,
+	]);
 
 	const tailClass =
 		position.tailDir === "left"
@@ -409,17 +520,9 @@ export function TutorialDialogue({
 
 	return (
 		<>
-			{/* Only block interaction when we have a highlight target. */}
 			{spotlight && (
 				// biome-ignore lint/a11y/useSemanticElements: full-viewport overlay
-				<div
-					class={styles.overlay}
-					onClick={handleNext}
-					onKeyDown={(e) => e.key === "Enter" && handleNext()}
-					role="button"
-					tabIndex={-1}
-					aria-label="Continue"
-				/>
+				<div class={styles.overlay} onClick={handleNext} aria-hidden="true" />
 			)}
 
 			{spotlight && (
@@ -428,8 +531,6 @@ export function TutorialDialogue({
 					<div
 						class={styles.spotlightHitbox}
 						onClick={handleNext}
-						onKeyDown={(e) => e.key === "Enter" && handleNext()}
-						role="button"
 						tabIndex={-1}
 						aria-label="Continue"
 						style={{
@@ -443,6 +544,7 @@ export function TutorialDialogue({
 			)}
 
 			<div
+				data-tutorial-bongo-container
 				class={`${styles.bongoContainer} ${isExiting ? styles.exiting : ""}`}
 				style={{
 					left: `${position.x}px`,
@@ -458,6 +560,35 @@ export function TutorialDialogue({
 					<p class={`${styles.messageText} ${isTyping ? styles.typing : ""}`}>
 						{displayedText}
 					</p>
+					{currentStep.kind === "palette" && (
+						<div class={styles.palettePicker}>
+							<div class={styles.paletteGrid}>
+								{palettes.map((p, idx) => {
+									const isSelected = selectedPaletteIndex === idx;
+									return (
+										<button
+											key={p.colors.join("-")}
+											type="button"
+											class={`${styles.paletteCard} ${
+												isSelected ? styles.selected : ""
+											}`}
+											onClick={() => choosePalette(idx)}
+										>
+											<div
+												class={styles.paletteStrip}
+												style={{
+													background: `linear-gradient(90deg, ${p.colors.join(", ")})`,
+												}}
+											/>
+										</button>
+									);
+								})}
+							</div>
+							{selectedPaletteIndex == null && (
+								<div class={styles.paletteHint}>Pick one to continue</div>
+							)}
+						</div>
+					)}
 
 					<div class={styles.controls}>
 						<div class={styles.dots}>
@@ -487,8 +618,11 @@ export function TutorialDialogue({
 								type="button"
 								class={`${styles.btn} ${styles.btnPrimary}`}
 								onClick={handleNext}
+								disabled={
+									currentStep.kind === "palette" && selectedPaletteIndex == null
+								}
 							>
-								{isTyping ? "Skip" : isLastStep ? "Bye Bye :)" : "Next"}
+								{isTyping ? "Skip" : isLastStep ? "Bye Bye!" : "Next"}
 							</button>
 						</div>
 					</div>

@@ -369,16 +369,34 @@ requestAnimationFrame(render);
 export function setPalette(index: number): void {
 	const clampedIndex = Math.max(0, Math.min(index, PALETTE_COUNT - 1));
 
-	if (clampedIndex === currentPalette && !isTransitioning) {
+	// If we're already there (or already heading there), do nothing.
+	if (clampedIndex === targetPalette) {
 		return;
 	}
 
-	if (isTransitioning) {
+	if (!isTransitioning) {
+		// Start a new transition from the current palette.
+		targetPalette = clampedIndex;
+		transitionStartTime = uniformsA.iTime.value;
+		isTransitioning = true;
 		return;
 	}
+
+	// Mid-transition retargeting:
+	// 1) Bake the current intermediate state as the new "from" palette,
+	// 2) Restart the transition clock.
+	const timeSeconds = uniformsA.iTime.value;
+	const elapsed = timeSeconds - transitionStartTime;
+	const progress = Math.min(elapsed / TRANSITION_DURATION, 1.0);
+
+	// iPalette encodes "from" and "to" palettes as from*10 + to.
+	// We collapse the current blend to its closest palette to avoid a hard reset.
+	currentPalette = progress >= 0.5 ? targetPalette : currentPalette;
+	uniformsA.iPalette.value = currentPalette * 10 + currentPalette;
+	uniformsA.iMorphProgress.value = 0;
 
 	targetPalette = clampedIndex;
-	transitionStartTime = uniformsA.iTime.value;
+	transitionStartTime = timeSeconds;
 	isTransitioning = true;
 }
 
@@ -396,7 +414,7 @@ export function randomPalette(immediate?: boolean): void {
 	if (randomIndex === targetPalette) {
 		randomIndex = (randomIndex + 1) % PALETTE_COUNT;
 	}
-    if (immediate) {
-        setPaletteImmediate(randomIndex);
-    } else setPalette(randomIndex);
+	if (immediate) {
+		setPaletteImmediate(randomIndex);
+	} else setPalette(randomIndex);
 }
