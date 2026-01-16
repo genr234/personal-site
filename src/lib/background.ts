@@ -6,8 +6,8 @@ import shaderBufferA from "../assets/shaders/bufferA.glsl?raw";
 import shaderBufferB from "../assets/shaders/bufferB.glsl?raw";
 import shaderImage from "../assets/shaders/image.glsl?raw";
 
-const TARGET_FPS = 120;
-const FPS_SAMPLE_SIZE = 130;
+const TARGET_FPS = 30;
+const FPS_SAMPLE_SIZE = 40;
 const RESOLUTION_SCALE_MIN = 0.3;
 const RESOLUTION_SCALE_MAX = 1.0;
 
