@@ -1,5 +1,5 @@
-import { signal, computed } from "@preact/signals";
-import type { WindowConfig, WindowState, Position } from "./types";
+import { computed, signal } from "@preact/signals";
+import type { Position, WindowConfig, WindowState } from "./types";
 
 const CASCADE_OFFSET = 40;
 const CASCADE_START: Position = { x: 100, y: 80 };
@@ -10,6 +10,16 @@ let nextZIndex = 1000;
 export const windowsSignal = signal<WindowState[]>([]);
 export const focusedWindowId = signal<string | null>(null);
 export const mobileMode = signal(false);
+
+// Allows content (e.g. music player) to hide the header.
+export const hiddenWindowHeaders = signal<Set<string>>(new Set());
+
+export function setWindowHeaderHidden(windowId: string, hidden: boolean) {
+	const next = new Set(hiddenWindowHeaders.value);
+	if (hidden) next.add(windowId);
+	else next.delete(windowId);
+	hiddenWindowHeaders.value = next;
+}
 
 export const activeWindows = computed(() =>
 	windowsSignal.value.filter((window: WindowState) => !window.minimized),

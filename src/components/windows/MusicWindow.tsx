@@ -1,15 +1,16 @@
 import { useEffect, useRef, useState } from "preact/hooks";
 import playlistData from "../../data/playlist.json";
+import { setWindowHeaderHidden } from "../../lib/windowManager";
 import "../WindowSystem/styles/windows/music-window.scss";
 import {
 	FastForwardIcon,
+	ListMusic,
 	PauseIcon,
 	PlayIcon,
 	Volume,
 	Volume1,
 	Volume2,
 	VolumeOff,
-	ListMusic,
 	X,
 } from "lucide-preact";
 
@@ -19,6 +20,7 @@ interface Track {
 	artist: string;
 	cover: string;
 	url: string;
+	video?: string; // YouTube URL for background video
 }
 
 interface Playlist {
@@ -46,11 +48,46 @@ export function MusicWindow() {
 	} | null>(null);
 
 	const audioRef = useRef<HTMLAudioElement>(null);
+	const youtubeFrameRef = useRef<HTMLIFrameElement>(null);
+	const [isYoutubeReady, setIsYoutubeReady] = useState(false);
+	const lastSyncedVideoIdRef = useRef<string | null>(null);
+	const vinylRefMap = useRef(new Map<string, HTMLDivElement>());
+	const albumTargetRef = useRef<HTMLDivElement>(null);
+	const [flyingVinyl, setFlyingVinyl] = useState<{
+		cover: string;
+		from: DOMRect;
+		to: DOMRect;
+	} | null>(null);
 
 	const currentPlaylist = playlistData.playlists[
 		currentPlaylistIdx
 	] as Playlist;
 	const currentTrack = currentPlaylist.tracks[currentTrackIdx];
+
+	const getYoutubeIdFromUrl = (url?: string) => {
+		if (!url) return null;
+		try {
+			const parsed = new URL(url);
+			if (parsed.hostname === "youtu.be") {
+				const id = parsed.pathname.replace(/^\//, "");
+				return id || null;
+			}
+			const v = parsed.searchParams.get("v");
+			if (v) return v;
+			const pathParts = parsed.pathname.split("/").filter(Boolean);
+			const embedIdx = pathParts.indexOf("embed");
+			if (embedIdx >= 0 && pathParts[embedIdx + 1])
+				return pathParts[embedIdx + 1];
+			const shortsIdx = pathParts.indexOf("shorts");
+			if (shortsIdx >= 0 && pathParts[shortsIdx + 1])
+				return pathParts[shortsIdx + 1];
+			return null;
+		} catch {
+			return null;
+		}
+	};
+
+	const currentVideoId = getYoutubeIdFromUrl(currentTrack.video);
 
 	const changeTrack = (playlistIdx: number, trackIdx: number) => {
 		if (
@@ -90,17 +127,32 @@ export function MusicWindow() {
 		if (isTouchDevice()) {
 			changeTrack(playlistIdx, trackIdx);
 			setShowPlaylist(false);
-		} else {
-			// On desktop, use selection for drag-and-drop
-			if (
-				selectedVinyl?.playlistIdx === playlistIdx &&
-				selectedVinyl?.trackIdx === trackIdx
-			) {
-				setSelectedVinyl(null); // Deselect
-			} else {
-				setSelectedVinyl({ playlistIdx, trackIdx });
-			}
+			return;
 		}
+
+		// On desktop, use selection for drag-and-drop, but animate snap-to-player.
+		if (
+			selectedVinyl?.playlistIdx === playlistIdx &&
+			selectedVinyl?.trackIdx === trackIdx
+		) {
+			setSelectedVinyl(null);
+			setFlyingVinyl(null);
+			return;
+		}
+
+		const key = `${playlistIdx}:${trackIdx}`;
+		const fromEl = vinylRefMap.current.get(key);
+		const toEl = albumTargetRef.current;
+		if (fromEl && toEl) {
+			const from = fromEl.getBoundingClientRect();
+			const to = toEl.getBoundingClientRect();
+			const track = playlistData.playlists[playlistIdx].tracks[
+				trackIdx
+			] as Track;
+			setFlyingVinyl({ cover: track.cover, from, to });
+		}
+
+		setSelectedVinyl({ playlistIdx, trackIdx });
 	};
 
 	const handleDragStart = (
@@ -108,6 +160,18 @@ export function MusicWindow() {
 		playlistIdx: number,
 		trackIdx: number,
 	) => {
+		const key = `${playlistIdx}:${trackIdx}`;
+		const fromEl = vinylRefMap.current.get(key);
+		const toEl = albumTargetRef.current;
+		if (fromEl && toEl) {
+			const from = fromEl.getBoundingClientRect();
+			const to = toEl.getBoundingClientRect();
+			const track = playlistData.playlists[playlistIdx].tracks[
+				trackIdx
+			] as Track;
+			setFlyingVinyl({ cover: track.cover, from, to });
+		}
+
 		e.dataTransfer?.setData(
 			"application/json",
 			JSON.stringify({ playlistIdx, trackIdx }),
@@ -147,8 +211,6 @@ export function MusicWindow() {
 		}
 	};
 
-
-
 	useEffect(() => {
 		if (audioRef.current) {
 			audioRef.current.volume = volume;
@@ -165,6 +227,90 @@ export function MusicWindow() {
 			}
 		}
 	}, [isPlaying, volume, currentTrackIdx, isChanging]);
+
+	useEffect(() => {
+		setWindowHeaderHidden("music", Boolean(isPlaying && currentVideoId));
+		return () => setWindowHeaderHidden("music", false);
+	}, [isPlaying, currentVideoId]);
+
+	useEffect(() => {
+		const iframe = youtubeFrameRef.current;
+		if (!iframe) return;
+
+		setIsYoutubeReady(false);
+		const onMessage = (event: MessageEvent) => {
+			if (event.source !== iframe.contentWindow) return;
+			if (typeof event.data !== "string") return;
+			try {
+				const data = JSON.parse(event.data);
+				if (data?.event === "onReady") {
+					setIsYoutubeReady(true);
+				}
+			} catch {
+				// ignore
+			}
+		};
+
+		window.addEventListener("message", onMessage);
+		return () => window.removeEventListener("message", onMessage);
+	}, [currentVideoId]);
+
+	useEffect(() => {
+		const iframe = youtubeFrameRef.current;
+		const audio = audioRef.current;
+		if (!iframe || !audio || !isYoutubeReady || !currentVideoId) return;
+
+		const post = (func: string, args: unknown[] = []) => {
+			iframe.contentWindow?.postMessage(
+				JSON.stringify({
+					event: "command",
+					func,
+					args,
+				}),
+				"*",
+			);
+		};
+
+		if (isPlaying) post("playVideo");
+		else post("pauseVideo");
+	}, [isPlaying, isYoutubeReady, currentVideoId]);
+
+	useEffect(() => {
+		const iframe = youtubeFrameRef.current;
+		const audio = audioRef.current;
+		if (!iframe || !audio) return;
+		if (!currentVideoId) return;
+
+		const post = (func: string, args: unknown[] = []) => {
+			iframe.contentWindow?.postMessage(
+				JSON.stringify({
+					event: "command",
+					func,
+					args,
+				}),
+				"*",
+			);
+		};
+
+		const syncToAudio = () => {
+			if (!isYoutubeReady) return;
+			const t = audio.currentTime || 0;
+			post("seekTo", [t, true]);
+		};
+
+		const onSeeking = () => syncToAudio();
+		audio.addEventListener("seeking", onSeeking);
+
+		const interval = window.setInterval(() => {
+			if (!isPlaying) return;
+			syncToAudio();
+		}, 5000);
+
+		return () => {
+			audio.removeEventListener("seeking", onSeeking);
+			window.clearInterval(interval);
+		};
+	}, [currentVideoId, isPlaying, isYoutubeReady]);
 
 	const togglePlay = () => {
 		setIsPlaying(!isPlaying);
@@ -193,9 +339,10 @@ export function MusicWindow() {
 			duration > 0 && Number.isFinite(duration)
 				? (current / duration) * 100
 				: 0;
-        if (percent == 100) {
-            nextTrack();
-        }
+		if (percent === 100) {
+			nextTrack();
+		}
+
 		const clamped = Number.isFinite(percent)
 			? Math.max(0, Math.min(100, percent))
 			: 0;
@@ -278,6 +425,11 @@ export function MusicWindow() {
 									return (
 										<div
 											key={track.url}
+											ref={(el) => {
+												const key = `${pIdx}:${tIdx}`;
+												if (el) vinylRefMap.current.set(key, el);
+												else vinylRefMap.current.delete(key);
+											}}
 											className={`vinyl-item ${isNowPlaying ? "playing" : ""} ${isSelected ? "selected" : ""}`}
 											draggable={true}
 											onDragStart={(e) => handleDragStart(e, pIdx, tIdx)}
@@ -311,13 +463,54 @@ export function MusicWindow() {
 				onEnded={nextTrack}
 			/>
 
+			{(() => {
+				if (!currentVideoId) return null;
+				const src = `https://www.youtube.com/embed/${currentVideoId}?enablejsapi=1&origin=${encodeURIComponent(window.location.origin)}&autoplay=1&mute=1&controls=0&loop=1&playlist=${currentVideoId}&modestbranding=1&playsinline=1&rel=0&iv_load_policy=3`;
+				return (
+					<div
+						className={`player-video-bg ${isPlaying ? "playing" : ""}`}
+						aria-hidden="true"
+					>
+						<iframe
+							ref={youtubeFrameRef}
+							title="Background video"
+							src={src}
+							allow="autoplay; encrypted-media;"
+							referrerPolicy="strict-origin-when-cross-origin"
+						/>
+					</div>
+				);
+			})()}
+
 			<div
 				className={`player-body ${dragOver ? "drag-over" : ""} ${selectedVinyl ? "waiting-for-drop" : ""}`}
 				onDragOver={handleDragOver}
 				onDragLeave={handleDragLeave}
 				onDrop={handleDrop}
 			>
-				<div className="album-art-container">
+				<div className="album-art-container" ref={albumTargetRef}>
+					{flyingVinyl && (
+						<div
+							className="flying-vinyl"
+							style={
+								{
+									"--from-x": `${flyingVinyl.from.left + flyingVinyl.from.width / 2}px`,
+									"--from-y": `${flyingVinyl.from.top + flyingVinyl.from.height / 2}px`,
+									"--to-x": `${flyingVinyl.to.left + flyingVinyl.to.width / 2}px`,
+									"--to-y": `${flyingVinyl.to.top + flyingVinyl.to.height / 2}px`,
+								} as unknown as Record<string, string>
+							}
+							onAnimationEnd={() => setFlyingVinyl(null)}
+						>
+							<div className="flying-vinyl-record">
+								<div
+									className="flying-vinyl-label"
+									style={{ backgroundImage: `url(${flyingVinyl.cover})` }}
+								/>
+							</div>
+						</div>
+					)}
+
 					{!selectedVinyl && (
 						<div
 							className={`vinyl-record ${isPlaying ? "spinning" : ""} ${isChanging ? "changing" : ""} ${isEntering ? "entering" : ""}`}
@@ -361,7 +554,11 @@ export function MusicWindow() {
 							min="0"
 							max="100"
 							ref={rangeRef}
-							value={Number.isFinite(progress) ? Math.max(0, Math.min(100, progress)) : 0}
+							value={
+								Number.isFinite(progress)
+									? Math.max(0, Math.min(100, progress))
+									: 0
+							}
 							onInput={handleSeek}
 						/>
 					</div>

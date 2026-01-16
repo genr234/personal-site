@@ -3,6 +3,7 @@
   height: 100%;
   display: flex;
   flex-direction: column;
+  justify-content: center; // Center vertically when header is gone
   background: linear-gradient(135deg, #4c4287 0%, #6009ba 100%);
   color: #fff;
   padding: 1rem;
@@ -17,6 +18,32 @@
     background-image: radial-gradient(#ffffff11 1px, transparent 1px);
     background-size: 20px 20px;
     pointer-events: none;
+    z-index: 1;
+  }
+}
+
+.player-video-bg {
+  position: absolute;
+  inset: -40px;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+  opacity: 0;
+  transition: opacity 260ms ease;
+
+  &.playing {
+    opacity: 1;
+  }
+
+  iframe {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 180%;
+    height: 180%;
+    transform: translate(-50%, -50%);
+    filter: blur(14px) brightness(0.5) saturate(1.1);
+    opacity: 0.95;
   }
 }
 
@@ -24,7 +51,7 @@
   position: absolute;
   top: 1rem;
   right: 1rem;
-  z-index: 10;
+  z-index: 20;
   background: rgba(255, 255, 255, 0.1);
   border: none;
   color: #fff;
@@ -48,7 +75,7 @@
   height: 240px;
   background: rgba(255, 255, 255, 0.05);
   backdrop-filter: blur(20px);
-  z-index: 20;
+  z-index: 30;
   padding: 1rem;
   transform: translateY(100%);
   transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
@@ -266,6 +293,7 @@
 .player-body {
   position: relative;
   transition: filter 0.3s;
+  z-index: 10;
   
   &.drag-over {
     .vinyl-record {
@@ -316,7 +344,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.3s ease;
+  transition: transform 0.35s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.25s ease;
 
   // Grooves
   &::before {
@@ -337,23 +365,23 @@
   }
   
   &.changing {
-    transform: scale(0.8) translateX(-150%) rotate(-45deg);
+    transform: scale(0.92) rotate(-6deg);
     opacity: 0;
-    transition: transform 0.4s ease-in, opacity 0.4s ease-in;
+    transition: transform 0.25s ease-out, opacity 0.2s ease-out;
   }
-  
+
   &.entering {
-    animation: slideInRecord 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+    animation: popInRecord 0.32s cubic-bezier(0.22, 1, 0.36, 1) forwards;
   }
 }
 
-@keyframes slideInRecord {
+@keyframes popInRecord {
   from {
-    transform: scale(0.8) translateX(150%) rotate(45deg);
+    transform: scale(0.92) rotate(6deg);
     opacity: 0;
   }
   to {
-    transform: scale(1) translateX(0) rotate(0);
+    transform: scale(1) rotate(0);
     opacity: 1;
   }
 }
@@ -379,6 +407,90 @@
     background: #fff;
     border-radius: 50%;
     border: 1px solid #000;
+  }
+}
+
+.flying-vinyl {
+  position: fixed;
+  left: var(--from-x);
+  top: var(--from-y);
+  width: 220px;
+  height: 220px;
+  transform: translate(-50%, -50%);
+  z-index: 999;
+  pointer-events: none;
+  animation: flyToPlayer 520ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.flying-vinyl-record {
+  width: 220px;
+  height: 220px;
+  border-radius: 50%;
+  background: #111;
+  position: relative;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.5), inset 0 2px 8px rgba(0,0,0,0.6);
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 5%;
+    left: 5%;
+    right: 5%;
+    bottom: 5%;
+    border-radius: 50%;
+    background: repeating-radial-gradient(#111 0, #111 2px, #222 3px, #222 4px);
+  }
+}
+
+.flying-vinyl-label {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 80px;
+  height: 80px;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  background-size: cover;
+  background-position: center;
+  border: 2px solid #333;
+
+  &::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 12px;
+    height: 12px;
+    background: #fff;
+    border-radius: 50%;
+    border: 1px solid #000;
+  }
+}
+
+@keyframes flyToPlayer {
+  0% {
+    transform: translate(-50%, -50%) scale(0.55) rotate(0deg);
+    opacity: 0.95;
+    filter: drop-shadow(0 8px 22px rgba(0,0,0,0.45));
+  }
+  70% {
+    transform: translate(
+        calc(-50% + (var(--to-x) - var(--from-x)) * 1px),
+        calc(-50% + (var(--to-y) - var(--from-y)) * 1px)
+      )
+      scale(1.02)
+      rotate(240deg);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(
+        calc(-50% + (var(--to-x) - var(--from-x)) * 1px),
+        calc(-50% + (var(--to-y) - var(--from-y)) * 1px)
+      )
+      scale(1)
+      rotate(320deg);
+    opacity: 0;
   }
 }
 

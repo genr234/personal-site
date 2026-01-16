@@ -1,45 +1,44 @@
 {
 	"playlists": [
 		{
-			"id": "test1",
-			"name": "music",
+			"id": "1",
+			"name": "generational bangers",
 			"tracks": [
 				{
-					"title": "Neon Lights",
-					"artist": "Synthwave Boy",
-					"cover": "https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?q=80&w=300&auto=format&fit=crop",
-					"url": "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3"
+					"title": "Neurodivergence",
+					"artist": "ROMA",
+					"cover": "https://files.catbox.moe/zfwrgh",
+					"url": "https://files.catbox.moe/a27xug.mp3",
+                    "video": "https://www.youtube.com/watch?v=DCyRVr9lcZI"
 				},
-				{
-					"title": "Midnight Drive",
-					"artist": "Retro Future",
-					"cover": "https://images.unsplash.com/photo-1594623930572-300a3011d9ae?q=80&w=300&auto=format&fit=crop",
-					"url": "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3"
-				},
-				{
-					"title": "Cyber Funk",
-					"artist": "Glitch Mob",
-					"cover": "https://images.unsplash.com/photo-1550745165-9bc0b252726f?q=80&w=300&auto=format&fit=crop",
-					"url": "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3"
-				}
-			]
-		},
-		{
-			"id": "test2",
-			"name": "blah blah blah",
-			"tracks": [
-				{
-					"title": "Lo-Fi Study",
-					"artist": "Chillhop Master",
-					"cover": "https://images.unsplash.com/photo-1516280440614-6697288d5d38?q=80&w=300&auto=format&fit=crop",
-					"url": "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-4.mp3"
-				},
-				{
-					"title": "Rainy Day",
-					"artist": "Mood Maker",
-					"cover": "https://images.unsplash.com/photo-1515162816999-a0c47dc192f7?q=80&w=300&auto=format&fit=crop",
-					"url": "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-8.mp3"
-				}
+                {
+                  "title": "FFVII Remake - Hollow",
+                  "artist": "Yosh",
+                  "cover": "https://files.catbox.moe/37tegb.jpeg",
+                  "url": "https://files.catbox.moe/u3r6i2.mp3",
+                  "video": "https://www.youtube.com/watch?v=h0AcvqihLgM"
+                },
+                {
+                    "title": "Problems (feat. Kasane Teto)",
+                    "artist": "alterclad",
+                    "cover": "https://files.catbox.moe/ery496",
+                    "url": "https://files.catbox.moe/af72cf.mp3",
+                    "video": "https://www.youtube.com/watch?v=OoDNRyDJW58"
+                },
+                {
+                    "title": "purse",
+                    "artist": "nicosbands, sunohara",
+                    "cover": "https://files.catbox.moe/70x0f2.jpg",
+                    "url": "https://files.catbox.moe/opd8o0.mp3",
+                    "video": "https://www.youtube.com/watch?v=7qAd37RnT8I"
+                },
+                {
+                    "title": "I got spawnkilled in princess tycoon (feat. skip this song)",
+                    "artist": "Lucarius, skip this song",
+                    "cover": "https://files.catbox.moe/7mcfrh.png",
+                    "url": "https://files.catbox.moe/2eeelh.mp3",
+                    "video": "https://www.youtube.com/watch?v=SZ_H0tpomxo"
+                }
 			]
 		}
 	]

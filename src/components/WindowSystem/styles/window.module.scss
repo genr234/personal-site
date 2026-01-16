@@ -47,6 +47,7 @@
   user-select: none;
 }
 
+
 .windowHeader.dragging,
 body.window-dragging .windowHeader {
   cursor: grabbing !important;
@@ -101,6 +102,12 @@ body.window-dragging .windowHeader {
   padding: 16px;
   height: calc(100% - 48px);
   overflow: hidden;
+}
+
+.windowNoHeader {
+  .windowContent {
+    height: 100%;
+  }
 }
 
 @media (max-width: 1023px) {

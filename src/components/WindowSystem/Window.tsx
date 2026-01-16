@@ -1,14 +1,16 @@
-import { useRef, useState, useEffect } from "preact/hooks";
+import { useComputed } from "@preact/signals";
+import { useEffect, useRef, useState } from "preact/hooks";
 import type { WindowState } from "../../lib/types";
-import styles from "./styles/window.module.scss";
-import { WindowHeader } from "./WindowHeader";
 import {
-	focusWindow,
-	minimizeWindow,
 	closeWindow,
+	focusWindow,
+	hiddenWindowHeaders,
+	minimizeWindow,
 	updateWindowPosition,
 } from "../../lib/windowManager";
+import styles from "./styles/window.module.scss";
 import WindowContent from "./WindowContent.tsx";
+import { WindowHeader } from "./WindowHeader";
 
 interface Props {
 	windowState: WindowState;
@@ -110,6 +112,8 @@ export function Window({ windowState }: Props) {
 		};
 	}, [isDragging, id, x, y, width, height]);
 
+	const isHeaderHidden = useComputed(() => hiddenWindowHeaders.value.has(id));
+
 	return (
 		<div
 			ref={windowRef}
@@ -117,6 +121,7 @@ export function Window({ windowState }: Props) {
 				styles.window,
 				focused && styles.windowFocused,
 				variant === "seamless" && styles.windowSeamless,
+				isHeaderHidden.value && styles.windowNoHeader,
 			]
 				.filter(Boolean)
 				.join(" ")}

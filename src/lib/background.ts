@@ -1,7 +1,6 @@
 // credits to: https://github.com/hackclub/penumbra/blob/main/src/scripts/shader.ts
 
 import * as THREE from "three";
-import { lerp } from "three/src/math/MathUtils.js";
 
 import shaderBufferA from "../assets/shaders/bufferA.glsl?raw";
 import shaderBufferB from "../assets/shaders/bufferB.glsl?raw";
@@ -179,8 +178,6 @@ uniformsImage.iChannel0.value = rtB.texture;
 
 let actualMouseX = 0,
 	actualMouseY = 0;
-const lerpedMouseX = 0,
-	lerpedMouseY = 0;
 
 let lastTime = 0,
 	timeBasis = 0;
@@ -253,9 +250,8 @@ function onResize() {
 function measureFPS(currentTime: number) {
 	if (lastFrameTime > 0) {
 		const frameDelta = currentTime - lastFrameTime;
-		const currentFPS = 1000 / frameDelta;
 
-		fpsHistory[fpsHistoryIndex] = currentFPS;
+		fpsHistory[fpsHistoryIndex] = 1000 / frameDelta;
 		fpsHistoryIndex = (fpsHistoryIndex + 1) % FPS_SAMPLE_SIZE;
 		if (fpsHistoryCount < FPS_SAMPLE_SIZE) {
 			fpsHistoryCount++;
