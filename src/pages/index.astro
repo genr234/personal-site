@@ -2,6 +2,8 @@
 import Layout from "../layouts/Layout.astro";
 import { WindowManager } from "../components/WindowSystem/WindowManager.tsx";
 import { TutorialDialogue } from "../components/Tutorial/TutorialDialogue.tsx";
+import {createWindow} from "../lib/windowManager.ts";
+import {defaultWindowConfigs} from "../lib/windowConfigs.ts";
 ---
 
 <Layout>
@@ -15,7 +17,7 @@ import { TutorialDialogue } from "../components/Tutorial/TutorialDialogue.tsx";
         })
     </script>
     <WindowManager client:load />
-    <TutorialDialogue client:only="preact" steps={[
+    <TutorialDialogue client:load steps={[
                       {
                           id: "welcome",
                           text: "Hey there! Welcome to my little corner of the internet!",
@@ -40,5 +42,6 @@ import { TutorialDialogue } from "../components/Tutorial/TutorialDialogue.tsx";
                           text: "That's it! Have fun exploring. If you like this website send me a message to let me know (or just to say hi!) See ya!",
                       }
     ]}
+    onComplete={"about"}
     />
 </Layout>

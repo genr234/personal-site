@@ -16,10 +16,16 @@ const PALETTE_NAMES = ["Ocean", "Sunset", "Forest", "Aurora", "Neon"] as const;
 
 const PALETTE_COUNT = PALETTE_NAMES.length;
 
-const canvas = document.querySelector<HTMLCanvasElement>("#shader")!;
-const renderer = new THREE.WebGLRenderer({ antialias: true, canvas });
-const gl = renderer.getContext();
-renderer.autoClear = false;
+let canvas: HTMLCanvasElement | null = null;
+let renderer: THREE.WebGLRenderer | null = null;
+let gl: WebGLRenderingContext | WebGL2RenderingContext | null = null;
+
+if (typeof window !== "undefined") {
+	canvas = document.querySelector<HTMLCanvasElement>("#shader")!;
+	renderer = new THREE.WebGLRenderer({ antialias: true, canvas });
+	gl = renderer.getContext()!;
+	renderer.autoClear = false;
+}
 
 const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, -1, 1);
 const quad = new THREE.PlaneGeometry(2, 2);
@@ -84,31 +90,33 @@ let lastFrameTime = 0;
 let currentResolutionScale = 1.0;
 
 let usingMobileGpu = false;
-const dbgRenderInfo = gl.getExtension("WEBGL_debug_renderer_info");
-if (dbgRenderInfo) {
-	const model = gl.getParameter(dbgRenderInfo.UNMASKED_RENDERER_WEBGL);
-	const vendor = gl.getParameter(dbgRenderInfo.UNMASKED_VENDOR_WEBGL);
+if (typeof window !== "undefined" && gl) {
+	const dbgRenderInfo = gl.getExtension("WEBGL_debug_renderer_info");
+	if (dbgRenderInfo) {
+		const model = gl.getParameter(dbgRenderInfo.UNMASKED_RENDERER_WEBGL);
+		const vendor = gl.getParameter(dbgRenderInfo.UNMASKED_VENDOR_WEBGL);
 
-	const mobileVendors = ["ARM", "QUALCOMM"];
+		const mobileVendors = ["ARM", "QUALCOMM"];
 
-	const mobileModels = [
-		"MALI-",
-		"LLVMPIPE",
-		"SWIFTSHADER",
-		"ADRENO",
-		"XCLIPSE",
-		"HD GRAPHICS",
-		"UHD GRAPHICS",
-	];
+		const mobileModels = [
+			"MALI-",
+			"LLVMPIPE",
+			"SWIFTSHADER",
+			"ADRENO",
+			"XCLIPSE",
+			"HD GRAPHICS",
+			"UHD GRAPHICS",
+		];
 
-	if (
-		(typeof vendor === "string" &&
-			mobileVendors.includes(vendor.trim().toUpperCase())) ||
-		(typeof model === "string" &&
-			mobileModels.includes(model.trim().toUpperCase()))
-	) {
-		console.log("Mobile GPU detected. Using low detail mode.");
-		usingMobileGpu = true;
+		if (
+			(typeof vendor === "string" &&
+				mobileVendors.includes(vendor.trim().toUpperCase())) ||
+			(typeof model === "string" &&
+				mobileModels.includes(model.trim().toUpperCase()))
+		) {
+			console.log("Mobile GPU detected. Using low detail mode.");
+			usingMobileGpu = true;
+		}
 	}
 }
 
@@ -170,11 +178,8 @@ sceneA.add(new THREE.Mesh(quad, matA));
 sceneB.add(new THREE.Mesh(quad, matB));
 sceneImage.add(new THREE.Mesh(quad, matImage));
 
-let rtA = makeRenderTarget();
-let rtB = makeRenderTarget();
-
-uniformsB.iChannel0.value = rtA.texture;
-uniformsImage.iChannel0.value = rtB.texture;
+let rtA: THREE.WebGLRenderTarget;
+let rtB: THREE.WebGLRenderTarget;
 
 let actualMouseX = 0,
 	actualMouseY = 0;
@@ -182,27 +187,38 @@ let actualMouseX = 0,
 let lastTime = 0,
 	timeBasis = 0;
 
-window.addEventListener("pointermove", (e) => {
-	const rect = canvas.getBoundingClientRect();
-	actualMouseX = (e.clientX - rect.left) * (canvas.width / rect.width);
-	actualMouseY = (rect.bottom - e.clientY) * (canvas.height / rect.height);
-});
+if (typeof window !== "undefined" && renderer && canvas) {
+	rtA = makeRenderTarget()!;
+	rtB = makeRenderTarget()!;
 
-window.addEventListener("blur", () => {
-	// The shader goes kinda crazy with large values of t, reset them when the user switches tabs
-	if (lastTime > timeBasis + 30) {
-		console.log(`Time basis fast-forwarded to ${lastTime}`);
-		timeBasis = lastTime;
-	}
-});
+	uniformsB.iChannel0.value = rtA.texture;
+	uniformsImage.iChannel0.value = rtB.texture;
+
+	window.addEventListener("pointermove", (e) => {
+		const rect = canvas!.getBoundingClientRect();
+		actualMouseX = (e.clientX - rect.left) * (canvas!.width / rect.width);
+		actualMouseY = (rect.bottom - e.clientY) * (canvas!.height / rect.height);
+	});
+
+	window.addEventListener("blur", () => {
+		// The shader goes kinda crazy with large values of t, reset them when the user switches tabs
+		if (lastTime > timeBasis + 30) {
+			console.log(`Time basis fast-forwarded to ${lastTime}`);
+			timeBasis = lastTime;
+		}
+	});
+
+	requestAnimationFrame(render);
+}
 
 function resizeRendererToDisplaySize(r: THREE.WebGLRenderer) {
 	const c = r.domElement;
+	const dpr = typeof window !== "undefined" ? window.devicePixelRatio : 1;
 	const width = Math.floor(
-		c.clientWidth * devicePixelRatio * currentResolutionScale,
+		c.clientWidth * dpr * currentResolutionScale,
 	);
 	const height = Math.floor(
-		c.clientHeight * devicePixelRatio * currentResolutionScale,
+		c.clientHeight * dpr * currentResolutionScale,
 	);
 	const needResize = c.width !== width || c.height !== height;
 
@@ -214,6 +230,7 @@ function resizeRendererToDisplaySize(r: THREE.WebGLRenderer) {
 }
 
 function makeRenderTarget() {
+	if (!renderer) return null;
 	const { width, height } = renderer.domElement;
 	const rt = new THREE.WebGLRenderTarget(width, height, {
 		depthBuffer: false,
@@ -228,6 +245,7 @@ function makeRenderTarget() {
 }
 
 function updateResUniforms() {
+	if (!renderer) return;
 	const { width, height } = renderer.domElement;
 	const res = new THREE.Vector3(width, height, 1);
 	uniformsA.iResolution.value.copy(res);
@@ -236,14 +254,19 @@ function updateResUniforms() {
 }
 
 function onResize() {
+	if (!renderer) return;
 	if (resizeRendererToDisplaySize(renderer)) {
-		rtA.dispose();
-		rtB.dispose();
-		rtA = makeRenderTarget();
-		rtB = makeRenderTarget();
-		uniformsB.iChannel0.value = rtA.texture;
-		uniformsImage.iChannel0.value = rtB.texture;
-		updateResUniforms();
+		rtA?.dispose();
+		rtB?.dispose();
+		const newRtA = makeRenderTarget();
+		const newRtB = makeRenderTarget();
+		if (newRtA && newRtB) {
+			rtA = newRtA;
+			rtB = newRtB;
+			uniformsB.iChannel0.value = rtA.texture;
+			uniformsImage.iChannel0.value = rtB.texture;
+			updateResUniforms();
+		}
 	}
 }
 
@@ -326,6 +349,7 @@ function updateTransition(timeSeconds: number) {
 }
 
 function render(timeMs: number) {
+	if (!renderer || !rtA || !rtB) return;
 	measureFPS(timeMs);
 
 	lastTime = timeMs;
@@ -359,8 +383,6 @@ function render(timeMs: number) {
 
 	requestAnimationFrame(render);
 }
-
-requestAnimationFrame(render);
 
 export function setPalette(index: number): void {
 	const clampedIndex = Math.max(0, Math.min(index, PALETTE_COUNT - 1));

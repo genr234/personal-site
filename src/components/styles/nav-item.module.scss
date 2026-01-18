@@ -35,16 +35,14 @@
 	}
 }
 
-/* exported active class so styles.active exists in the module */
 .active {
 	text-decoration: none !important;
 	opacity: 1;
-	color: #111;
+	color: white;
 	font-weight: 600;
 	&::after {
-		transform: scaleX(1);
 		opacity: 1;
-		background: #111; /* active underline color */
+		background: white;
 		height: 2px;
 	}
 }

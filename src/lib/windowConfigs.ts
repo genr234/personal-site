@@ -26,12 +26,13 @@ export const defaultWindowConfigs: WindowConfig[] = [
 	{
 		id: "about",
 		title: "About",
-		color: "#6b21a8",
+		color: "#F9F8F6",
+        variant: "seamless",
 		icon: "User",
-		initialSize: { width: 500, height: 450 },
+		initialSize: { width: 700, height: 500 },
 		initialPosition: { x: 200, y: 160 },
-		headerBackground: "#6b21a8",
-		headerTextColor: "#ffffff",
+		headerBackground: "#F9F8F6",
+		headerTextColor: "#001666",
         shownByDefault: false
 	},
 	{

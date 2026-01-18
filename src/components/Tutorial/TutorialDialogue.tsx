@@ -6,6 +6,8 @@ import {
 } from "preact/hooks";
 import { setPalette, setPaletteImmediate } from "../../lib/background.ts";
 import styles from "./styles/tutorial.module.scss";
+import {createWindow} from "../../lib/windowManager.ts";
+import {defaultWindowConfigs} from "../../lib/windowConfigs.ts";
 
 export interface TutorialStep {
 	id: string;
@@ -22,7 +24,7 @@ export interface TutorialStep {
 interface TutorialDialogueProps {
 	steps?: TutorialStep[];
 	forceShow?: boolean;
-	onComplete?: () => void;
+	onComplete?: string;
 }
 
 interface SpotlightRect {
@@ -333,7 +335,7 @@ export function TutorialDialogue({
 		setTimeout(() => {
 			setIsVisible(false);
 			setIsExiting(false);
-			onComplete?.();
+			createWindow(defaultWindowConfigs.find((c) => c.id === onComplete)!);
 		}, 200);
 	}, [markAsSeen, onComplete]);
 
@@ -583,9 +585,6 @@ export function TutorialDialogue({
 									);
 								})}
 							</div>
-							{selectedPaletteIndex == null && (
-								<div class={styles.paletteHint}>Pick one to continue</div>
-							)}
 						</div>
 					)}
 
@@ -629,6 +628,10 @@ export function TutorialDialogue({
 					{isFirstStep && !isMobile && (
 						<div class={styles.hint}>esc to skip</div>
 					)}
+
+                    {currentStep.kind === "palette" && (
+                        <div class={styles.hint}>(it might look bad on less beefy devices)</div>
+                    )}
 				</div>
 
 				<div

@@ -1,0 +1,159 @@
+$bg-color: #F9F8F6;
+$primary-orange: #FF5900;
+$secondary-blue: #001666;
+$light-blue: #CADCFC;
+$text-dark: #3F3F3F;
+$text-grey: #666666;
+
+@mixin appear-animation($name, $delay) {
+  opacity: 0;
+  animation: $name 0.9s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  animation-delay: $delay;
+}
+
+.portfolio-wrapper {
+  width: 100%;
+  height: 100%;
+  background-color: $bg-color;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-family: 'DM Sans', sans-serif;
+
+  .photo-card {
+    position: absolute;
+    width: 130px;
+    height: 100px;
+    background: white;
+    border: 5px solid white;
+    border-radius: 12px;
+    overflow: hidden;
+    z-index: 1;
+
+    img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    &.top-left {
+      top: 35px;
+      left: 45px;
+      transform: rotate(-12deg);
+      @include appear-animation(slideInTL, 0.2s);
+    }
+
+    &.top-right {
+      top: 40px;
+      right: 50px;
+      transform: rotate(12deg);
+      @include appear-animation(slideInTR, 0.3s);
+    }
+
+    &.bottom-left {
+      bottom: 40px;
+      left: 50px;
+      transform: rotate(8deg);
+      @include appear-animation(slideInBL, 0.4s);
+    }
+
+    &.bottom-right {
+      bottom: 45px;
+      right: 50px;
+      transform: rotate(-10deg);
+      @include appear-animation(slideInBR, 0.5s);
+    }
+  }
+
+  .center-content {
+    z-index: 10;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    max-width: 400px;
+
+    .greeting {
+      font-size: 0.95rem;
+      color: $text-grey;
+      margin: 0 0 5px 0;
+      @include appear-animation(fadeUp, 0.1s);
+    }
+
+    .headline {
+      font-family: 'Playfair Display', serif;
+      font-style: italic;
+      font-size: 2.8rem;
+      line-height: 1.15;
+      font-weight: 500;
+      color: $primary-orange;
+      margin: 8px 0;
+      letter-spacing: -0.01em;
+      @include appear-animation(fadeUp, 0.2s);
+    }
+
+    .tagline {
+      font-size: 1rem;
+      color: $text-dark;
+      margin: 10px 0 25px 0;
+      font-weight: 500;
+      @include appear-animation(fadeUp, 0.3s);
+    }
+
+    .cta-btn {
+      background-color: $primary-orange;
+      color: white;
+      border: none;
+      padding: 10px 28px;
+      font-size: 0.95rem;
+      border-radius: 50px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      font-family: 'DM Sans', sans-serif;
+      transition: transform 0.2s ease;
+      @include appear-animation(fadeUp, 0.5s);
+
+      .arrow {
+        width: 20px;
+        height: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      &:hover {
+        transform: translateY(-2px);
+      }
+    }
+  }
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(15px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideInTL {
+  from { opacity: 0; transform: translate(-30px, -30px) rotate(-20deg); }
+  to { opacity: 1; transform: translate(0, 0) rotate(-12deg); }
+}
+
+@keyframes slideInTR {
+  from { opacity: 0; transform: translate(30px, -30px) rotate(20deg); }
+  to { opacity: 1; transform: translate(0, 0) rotate(12deg); }
+}
+
+@keyframes slideInBL {
+  from { opacity: 0; transform: translate(-30px, 30px) rotate(0deg); }
+  to { opacity: 1; transform: translate(0, 0) rotate(8deg); }
+}
+
+@keyframes slideInBR {
+  from { opacity: 0; transform: translate(30px, 30px) rotate(-20deg); }
+  to { opacity: 1; transform: translate(0, 0) rotate(-10deg); }
+}
