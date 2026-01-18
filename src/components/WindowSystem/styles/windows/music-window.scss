@@ -39,11 +39,21 @@
     position: absolute;
     top: 50%;
     left: 50%;
-    width: 180%;
-    height: 180%;
+    width: 200vmax;
+    height: 112.5vmax;
     transform: translate(-50%, -50%);
     filter: blur(14px) brightness(0.5) saturate(1.1);
     opacity: 0.95;
+    border: none;
+    user-select: none;
+
+    @supports (aspect-ratio: 16/9) {
+      width: auto;
+      height: auto;
+      min-width: 110%;
+      min-height: 110%;
+      aspect-ratio: 16 / 9;
+    }
   }
 }
 
