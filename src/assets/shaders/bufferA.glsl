@@ -8,8 +8,8 @@ const float CAMERA_FOV = 0.3;
 const vec3  LIGHT_POS  = vec3(-2.0, 2.0, -1.0);
 
 const float DEG2RAD     = PI / 180.0;
-const float MAX_ANIM_SPEED  = 0.15;
-const float MIN_ANIM_SPEED  = 0.08;
+const float MAX_ANIM_SPEED  = 0.02;
+const float MIN_ANIM_SPEED  = 0.01;
 
 /*----------------------------*\
 |  > Custom uniforms           |
@@ -150,9 +150,9 @@ float sdTorus(vec3 p, vec2 t) {
 float sdDisplacementOrganic(vec3 p, float time) {
     float d = 0.0;
     // Layer multiple frequencies for organic feel
-    d += sin(1.5 * p.x + time * 0.3) * sin(1.8 * p.y + time * 0.2) * sin(1.5 * p.z + time * 0.25);
-    d += 0.5 * sin(3.0 * p.x - time * 0.15) * sin(2.8 * p.y - time * 0.1) * sin(3.2 * p.z + time * 0.12);
-    d += 0.25 * sin(5.0 * p.x + time * 0.08) * cos(4.5 * p.y) * sin(4.8 * p.z - time * 0.05);
+    d += sin(1.5 * p.x + time * 0.05) * sin(1.8 * p.y + time * 0.03) * sin(1.5 * p.z + time * 0.04);
+    d += 0.5 * sin(3.0 * p.x - time * 0.02) * sin(2.8 * p.y - time * 0.015) * sin(3.2 * p.z + time * 0.02);
+    d += 0.25 * sin(5.0 * p.x + time * 0.01) * cos(4.5 * p.y) * sin(4.8 * p.z - time * 0.005);
     return d;
 }
 
@@ -176,17 +176,17 @@ float sdScene(vec3 p) {
 
     // Smoother rotation with organic movement
     float rotSpeed = iTime * animSpeed;
-    torusPos = rotateX(torusPos, DEG2RAD * 20.0 + sin(iTime * 0.1) * 0.05);
+    torusPos = rotateX(torusPos, DEG2RAD * 20.0 + sin(iTime * 0.02) * 0.05);
     torusPos = rotateZ(torusPos, DEG2RAD * mod(-25.0 + rotSpeed, 360.0));
     
     // Gentle twist variation over time
-    float twistAmount = 1.0 + (87.0 / 15.0) + sin(iTime * 0.15) * 0.3;
+    float twistAmount = 1.0 + (87.0 / 15.0) + sin(iTime * 0.03) * 0.3;
     torusPos = transformTwist(torusPos, twistAmount);
 
     float torusDist = sdTorus(torusPos, vec2(2.5, 1.0));
     float displacement = sdDisplacementOrganic(torusPos, iTime);
 
-    return torusDist - (displacement / 6.0);
+    return torusDist - (displacement / 12.0);
 }
 
 // Determines the distance to the scene
@@ -227,12 +227,12 @@ void mainImage(out vec4 out_fragColor, in vec2 fragCoord) {
         color = getPaletteColor(minDist * 0.8) * glowStrength;
     } else {
         vec3 p = ro + (rd * dist);
-        color = getPaletteColor(dist / 18.0 + iTime * 0.02);
+        color = getPaletteColor(dist / 18.0 + iTime * 0.005);
     }
 
     // Subtle ambient glow
     float ambientGlow = exp(-minDist * 2.0) * 0.15;
-    color += getPaletteColor(iTime * 0.05) * ambientGlow;
+    color += getPaletteColor(iTime * 0.01) * ambientGlow;
 
     out_fragColor = vec4(clamp01(color), 1);
 }

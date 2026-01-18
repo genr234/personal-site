@@ -2,6 +2,7 @@ import { MusicWindow } from "../windows/MusicWindow.tsx";
 import type { JSX } from "preact";
 import AboutWindow from "../windows/AboutWindow.tsx";
 import BlogWindow from "../windows/BlogWindow.tsx";
+import ContactWindow from "../windows/ContactWindow.tsx";
 
 interface Props {
 	windowId: string;
@@ -11,6 +12,7 @@ const contentMap: Record<string, JSX.Element> = {
 	music: <MusicWindow />,
     about: <AboutWindow />,
     blog: <BlogWindow />,
+    contact: <ContactWindow />,
 };
 
 export default function WindowContent({ windowId }: Props) {

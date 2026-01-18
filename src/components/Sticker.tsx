@@ -7,9 +7,10 @@ interface Props {
     initialRotate: number;
     delay: number;
     width?: number;
+    containerId?: string;
 }
 
-const Sticker = ({ src, initialX, initialY, initialRotate, delay, width = 120 }: Props) => {
+const Sticker = ({ src, initialX, initialY, initialRotate, delay, width = 120, containerId = 'portfolio-stage' }: Props) => {
     const [position, setPosition] = useState({ x: initialX, y: initialY });
     const [isDragging, setIsDragging] = useState(false);
     const [zIndex, setZIndex] = useState(10);
@@ -20,10 +21,12 @@ const Sticker = ({ src, initialX, initialY, initialRotate, delay, width = 120 }:
         e.preventDefault();
         e.stopPropagation();
 
-        const container = document.getElementById('portfolio-stage')!.getBoundingClientRect();
+        const container = document.getElementById(containerId);
+        if(!container) return;
+        const containerRect = container.getBoundingClientRect();
 
-        const currentMouseX = e.clientX - container.left;
-        const currentMouseY = e.clientY - container.top;
+        const currentMouseX = e.clientX - containerRect.left;
+        const currentMouseY = e.clientY - containerRect.top;
 
         offset.current = {
             x: currentMouseX - position.x,
@@ -38,10 +41,12 @@ const Sticker = ({ src, initialX, initialY, initialRotate, delay, width = 120 }:
         if (!isDragging) return;
 
         const handlePointerMove = (e: PointerEvent) => {
-            const container = document.getElementById('portfolio-stage')!.getBoundingClientRect();
+            const container = document.getElementById(containerId);
+            if(!container) return;
+            const containerRect = container.getBoundingClientRect();
 
-            const newX = (e.clientX - container.left) - offset.current.x;
-            const newY = (e.clientY - container.top) - offset.current.y;
+            const newX = (e.clientX - containerRect.left) - offset.current.x;
+            const newY = (e.clientY - containerRect.top) - offset.current.y;
 
             setPosition({ x: newX, y: newY });
         };

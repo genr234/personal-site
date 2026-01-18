@@ -363,9 +363,9 @@ function render(timeMs: number) {
 	uniformsB.iTime.value = timeSeconds;
 
 	// Slow movement based on time
-	scrollProgress = (timeSeconds * 0.2) % 2.0;
-	const slowMovementX = Math.sin(timeSeconds * 0.3) * 200;
-	const slowMovementY = Math.cos(timeSeconds * 0.25) * 200;
+	scrollProgress = (timeSeconds * 0.02) % 2.0;
+	const slowMovementX = Math.sin(timeSeconds * 0.05) * 200;
+	const slowMovementY = Math.cos(timeSeconds * 0.04) * 200;
 
 	uniformsA.iMouse.value.set(slowMovementX, slowMovementY, 0, 0);
 

@@ -6,7 +6,7 @@ import Header from "../components/Header.astro";
 	<head>
 		<meta charset="UTF-8" />
 		<meta name="viewport" content="width=device-width" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+		<link id="favicon" rel="icon" type="image/png" href="/favicons/default.png" />
         <link rel="preconnect" href="https://rsms.me/">
         <link rel="stylesheet" href="https://rsms.me/inter/inter.css">
         <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -15,7 +15,22 @@ import Header from "../components/Header.astro";
         <script data-collect-dnt="true" async src="https://scripts.simpleanalyticscdn.com/latest.js" is:inline></script>
         <meta name="generator" content={Astro.generator} />
         <script src="../lib/background.ts" />
-        <title>Astro Basics</title>
+        <script>
+            document.addEventListener("DOMContentLoaded", (e) => {
+                const favicon = document.getElementById("favicon")
+                let frame = 0;
+
+                setInterval(() => {
+                    if (frame >= 10) {
+                        frame = 0;
+                    } else {
+                        frame++;
+                    }
+                    favicon.href = `/favicons/${frame}.gif`;
+                }, 100);
+            })
+        </script>
+        <title>genr234's manor</title>
 	</head>
 	<body>
     <canvas id="shader"></canvas>
