@@ -24,19 +24,9 @@ export function WindowHeader({
 	onMouseDown,
 	isDragging,
 	variant = "default",
-	headerBackground,
-	headerTextColor,
 }: WindowHeaderProps) {
 	const isHidden = useComputed(() => hiddenWindowHeaders.value.has(id));
 	if (isHidden.value) return null;
-
-	const headerStyle =
-		variant === "seamless"
-			? ({
-					"--header-bg": headerBackground || "transparent",
-					"--header-text": headerTextColor || "#fff",
-				} as any)
-			: {};
 
 	return (
 		<header
@@ -47,7 +37,6 @@ export function WindowHeader({
 			]
 				.filter(Boolean)
 				.join(" ")}
-			style={headerStyle}
 			onMouseDown={onMouseDown}
 		>
 			<div class={styles.headerLeft}></div>

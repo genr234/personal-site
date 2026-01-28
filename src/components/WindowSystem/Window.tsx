@@ -132,7 +132,9 @@ export function Window({ windowState }: Props) {
 				height: `${height}px`,
 				zIndex,
 				"--window-color": color,
-			}}
+				"--header-bg": headerBackground || "transparent",
+				"--header-text": headerTextColor || "#fff",
+			} as any}
 			onMouseDown={() => focusWindow(id)}
 			role="dialog"
 			aria-labelledby={`window-title-${id}`}
@@ -146,8 +148,6 @@ export function Window({ windowState }: Props) {
 				onMouseDown={handleMouseDown}
 				isDragging={isDragging}
 				variant={variant}
-				headerBackground={headerBackground}
-				headerTextColor={headerTextColor}
 			/>
 			<div
 				class={[

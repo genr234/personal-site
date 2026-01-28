@@ -1,13 +1,11 @@
 import "../WindowSystem/styles/windows/about-window.scss"
-import {ArrowRight, MoveUpRight} from "lucide-preact";
-import {createWindow} from "../../lib/windowManager.ts";
-import {defaultWindowConfigs} from "../../lib/windowConfigs.ts";
+import { ArrowRight } from "lucide-preact";
+import { createWindow } from "../../lib/windowManager.ts";
+import { defaultWindowConfigs } from "../../lib/windowConfigs.ts";
 import Sticker from "../Sticker.tsx";
 
 
-interface Props {
-
-}
+interface Props {}
 
 export default function AboutWindow({}: Props) {
     return (
@@ -30,7 +28,7 @@ export default function AboutWindow({}: Props) {
             />
 
             <div className="center-content">
-                <p className="greeting">Hey! i'm genr234!</p>
+                <p className="greeting">Hey! i'm genr234.</p>
                 <h1 className="headline">I make computers <br /> do things</h1>
                 <p className="tagline">...and I still haven't gotten over how cool that is.</p>
                 <button className="cta-btn" onClick={() => createWindow(defaultWindowConfigs.find(c => c.id === "contact")!)}>
@@ -38,5 +36,6 @@ export default function AboutWindow({}: Props) {
                     <span className="arrow"><ArrowRight /></span>
                 </button>
             </div>
-        </div>    );
+        </div>
+    );
 }
