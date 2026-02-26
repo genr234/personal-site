@@ -116,10 +116,61 @@ body.window-dragging .windowHeader {
 
 @media (max-width: 767px) {
   .windowsContainer {
+    padding: 16px 16px 80px;
+  }
+
+  .windowsContainer {
     padding: 100px 16px 120px;
   }
 
+
   .window {
+    position: relative !important;
+    left: auto !important;
+    top: auto !important;
+    width: 100% !important;
+    height: auto !important;
+    min-height: 280px;
+    margin-bottom: 20px;
+    transform: none !important;
+    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    
+    // Add z-index to ensure proper stacking in flow
+    z-index: 1;
+
+    &.windowExpanded {
+      position: fixed !important;
+      inset: 0 !important;
+      z-index: 5000 !important;
+      width: 100vw !important;
+      height: 100vh !important;
+      margin: 0 !important;
+      border-radius: 0 !important;
+      animation: expandMobile 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+  }
+
+  .window.windowFocused {
+    transform: none !important;
+  }
+  
+  .backButton {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: none;
+    background: rgba(0, 0, 0, 0.05);
+    color: inherit;
+    cursor: pointer;
+    
+    &:hover {
+      background: rgba(0, 0, 0, 0.1);
+    }
+  }
+
     position: relative !important;
     left: auto !important;
     top: auto !important;
@@ -160,5 +211,16 @@ body.window-dragging .windowHeader {
     &:hover {
       background: rgba(255, 255, 255, 0.1);
     }
+  }
+}
+
+@keyframes expandMobile {
+  from {
+    transform: scale(0.95);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
   }
 }

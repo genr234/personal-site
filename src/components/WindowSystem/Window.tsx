@@ -5,6 +5,10 @@ import {
 	closeWindow,
 	focusWindow,
 	hiddenWindowHeaders,
+	expandWindow,
+	expandedWindowId,
+	collapseWindow,
+	mobileMode,
 	minimizeWindow,
 	updateWindowPosition,
 } from "../../lib/windowManager";
@@ -58,7 +62,11 @@ export function Window({ windowState }: Props) {
 	const [isDragging, setIsDragging] = useState(false);
 	const dragStartPos = useRef({ x: 0, y: 0, windowX: 0, windowY: 0 });
 
+	const isMobile = useComputed(() => mobileMode.value);
+	const isExpanded = useComputed(() => expandedWindowId.value === id);
+
 	const handleMouseDown = (e: MouseEvent) => {
+		if (isMobile.value) return;
 		// Only drag from header, not from buttons
 		const target = e.target as HTMLElement;
 		if (target.closest("button")) return;
@@ -122,10 +130,11 @@ export function Window({ windowState }: Props) {
 				focused && styles.windowFocused,
 				variant === "seamless" && styles.windowSeamless,
 				isHeaderHidden.value && styles.windowNoHeader,
+				isExpanded.value && styles.windowExpanded,
 			]
 				.filter(Boolean)
 				.join(" ")}
-			style={{
+			style={isMobile.value ? {} : {
 				left: `${x}px`,
 				top: `${y}px`,
 				width: `${width}px`,
@@ -135,7 +144,14 @@ export function Window({ windowState }: Props) {
 				"--header-bg": headerBackground || "transparent",
 				"--header-text": headerTextColor || "#fff",
 			} as any}
-			onMouseDown={() => focusWindow(id)}
+			onMouseDown={() => {
+				// On mobile, clicking/tapping the window expands it
+				if (isMobile.value && !isExpanded.value) {
+					expandWindow(id);
+					return;
+				}
+				focusWindow(id);
+			}}
 			role="dialog"
 			aria-labelledby={`window-title-${id}`}
 		>
@@ -148,6 +164,7 @@ export function Window({ windowState }: Props) {
 				onMouseDown={handleMouseDown}
 				isDragging={isDragging}
 				variant={variant}
+				onBack={isMobile.value && isExpanded.value ? () => collapseWindow() : undefined}
 			/>
 			<div
 				class={[

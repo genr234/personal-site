@@ -765,3 +765,44 @@
     transform: rotate(360deg);
   }
 }
+
+
+@media (max-width: 767px) {
+  .vinyl-record {
+    width: 160px;
+    height: 160px;
+  }
+
+  .vinyl-label {
+    width: 56px;
+    height: 56px;
+  }
+
+  .album-art-container {
+    padding: 0.5rem 0;
+    
+    &::before {
+      width: 160px;
+      height: 40px;
+      top: calc(50% + 5px);
+      filter: blur(20px);
+    }
+  }
+
+  .controls-area {
+    padding: 0.75rem;
+  }
+
+  .playlist-overlay {
+    height: 60vh;
+  }
+
+  .vinyl-sleeve, .vinyl-item {
+    width: 90px;
+    height: 90px; // Ensure height matches width for square aspect ratio
+  }
+  
+  .vinyl-item {
+    width: 90px; // Container width
+  }
+}

@@ -80,6 +80,74 @@
 
 @media (max-width: 767px) {
   .dock {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    width: 100%;
+    max-width: 100%;
+    transform: none;
+    border-radius: 0;
+    border-left: none;
+    border-right: none;
+    border-bottom: none;
+    padding: 8px 12px calc(8px + env(safe-area-inset-bottom));
+    backdrop-filter: blur(20px) saturate(180%);
+    background: rgba(255, 255, 255, 0.9);
+  }
+
+  .dockInner {
+    justify-content: space-around;
+    gap: 4px;
+    width: 100%;
+  }
+  
+  .dockItem {
+    width: auto;
+    height: auto;
+    min-width: 48px;
+    background: transparent;
+    flex-direction: column;
+    gap: 4px;
+    padding: 4px 0;
+    border-radius: 8px;
+    
+    // Disable hover effects
+    transform: none !important;
+    &:hover {
+      transform: none !important;
+    }
+  }
+
+  .icon {
+    width: 24px;
+    height: 24px;
+    margin-bottom: 2px;
+  }
+  
+  .label {
+    position: static;
+    background: transparent;
+    color: #1a1a1a;
+    padding: 0;
+    font-size: 10px;
+    opacity: 1;
+    transform: none;
+    pointer-events: none;
+    text-align: center;
+    line-height: 1;
+  }
+  
+  .dockItem:hover .label {
+    transform: none;
+  }
+
+  .activeIndicator {
+    display: none; // Hide active indicator on mobile, use color/weight if needed
+  }
+}
+
+  .dock {
     max-width: 420px;
   }
 

@@ -2,6 +2,7 @@
 import Layout from "../layouts/Layout.astro";
 import { WindowManager } from "../components/WindowSystem/WindowManager.tsx";
 import { TutorialDialogue } from "../components/Tutorial/TutorialDialogue.tsx";
+import { CommandPalette } from "../components/CommandPalette.tsx";
 import {createWindow} from "../lib/windowManager.ts";
 import {defaultWindowConfigs} from "../lib/windowConfigs.ts";
 ---
@@ -17,6 +18,7 @@ import {defaultWindowConfigs} from "../lib/windowConfigs.ts";
         })
     </script>
     <WindowManager client:load />
+    <CommandPalette client:load />
         <TutorialDialogue client:load steps={[
             {
                 id: "welcome",

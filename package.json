@@ -10,6 +10,7 @@
 		"test": "vitest"
 	},
 	"dependencies": {
+		"@astrojs/mdx": "^4.3.13",
 		"@astrojs/partytown": "^2.1.4",
 		"@astrojs/sitemap": "^3.7.0",
 		"@preact/signals": "^2.5.1",

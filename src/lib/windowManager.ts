@@ -10,6 +10,22 @@ let nextZIndex = 1000;
 export const windowsSignal = signal<WindowState[]>([]);
 export const focusedWindowId = signal<string | null>(null);
 export const mobileMode = signal(false);
+export const expandedWindowId = signal<string | null>(null);
+
+export function expandWindow(id: string) {
+	if (!mobileMode.value) return;
+	
+	// Ensure window is focused and brought to front
+	focusWindow(id);
+	
+	// Set as expanded
+	expandedWindowId.value = id;
+}
+
+export function collapseWindow() {
+	expandedWindowId.value = null;
+}
+
 
 // Allows content (e.g. music player) to hide the header.
 export const hiddenWindowHeaders = signal<Set<string>>(new Set());

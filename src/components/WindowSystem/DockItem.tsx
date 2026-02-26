@@ -36,7 +36,7 @@ export function DockItem({
 				"--dock-item-color": color,
 			}}
 		>
-			<span class={styles.icon}><DockIcon /></span>
+			<span class={styles.icon}><DockIcon size={24} /></span>
 			<span class={styles.label}>{label}</span>
 			{isActive && <span class={styles.activeIndicator}></span>}
 		</button>

@@ -2,6 +2,7 @@
 // Header.astro
 
 import NavItem from "./NavItem.tsx";
+import { SearchBar } from "./SearchBar.tsx";
 
 interface Props {
 	currentPath?: string;
@@ -15,7 +16,6 @@ const navItems = [
 	{ label: "About", windowName: "about" },
 	{ label: "Contact", windowName: "contact" },
 ];
-
 ---
 
 <script is:inline>
@@ -88,9 +88,9 @@ const navItems = [
 <header class="site-header">
     <div class="header-container">
         <div class="header-name">
-            <div class="name">
+            <span class="name">
                 genr234
-            </div>
+            </span>
         </div>
 
         <span class="header-center">
@@ -134,13 +134,17 @@ const navItems = [
     .header-name {
         justify-self: start;
         mix-blend-mode: normal;
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        width: fit-content;
     }
 
     .name {
         text-decoration: none;
-        font-family: Nano, sans-serif;
+        font-family: Jack, sans-serif;
         font-size: 1.125rem;
-        font-weight: 400;
+        font-weight: 100;
         display: inline-block;
         letter-spacing: 0.01em;
         color: #ffffff;
@@ -148,6 +152,20 @@ const navItems = [
         -webkit-text-fill-color: currentColor;
         position: relative;
         z-index: auto;
+        flex-shrink: 0;
+        opacity: 0.7;
+        transition: all 0.3s ease;
+        cursor: pointer;
+
+        &:hover {
+            opacity: 1;
+            font-weight: 400;
+        }
+    }
+
+    .search-container {
+        display: flex;
+        flex-shrink: 0;
     }
 
     .header-center,

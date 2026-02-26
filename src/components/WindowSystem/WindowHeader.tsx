@@ -1,5 +1,6 @@
 import { useComputed } from "@preact/signals";
 import { hiddenWindowHeaders } from "../../lib/windowManager";
+import { ArrowLeft } from "lucide-preact";
 import styles from "./styles/window.module.scss";
 
 interface WindowHeaderProps {
@@ -8,6 +9,7 @@ interface WindowHeaderProps {
 	icon: string;
 	onClose: () => void;
 	onMinimize: () => void;
+	onBack?: () => void;
 	onMouseDown?: (e: MouseEvent) => void;
 	isDragging?: boolean;
 	variant?: "default" | "seamless";
@@ -22,6 +24,7 @@ export function WindowHeader({
 	onClose,
 	onMinimize,
 	onMouseDown,
+	onBack,
 	isDragging,
 	variant = "default",
 }: WindowHeaderProps) {
@@ -39,7 +42,21 @@ export function WindowHeader({
 				.join(" ")}
 			onMouseDown={onMouseDown}
 		>
-			<div class={styles.headerLeft}></div>
+			<div class={styles.headerLeft}>
+				{onBack && (
+					<button
+						type="button"
+						class={styles.backButton}
+						onClick={(e) => {
+							e.stopPropagation();
+							onBack();
+						}}
+						aria-label="Back"
+					>
+						<ArrowLeft size={16} />
+					</button>
+				)}
+			</div>
 			<div class={styles.headerRight}>
 				<button
 					type="button"
