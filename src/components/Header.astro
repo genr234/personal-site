@@ -19,9 +19,6 @@ const navItems = [
 ---
 
 <script is:inline>
-    import {createWindow} from "../lib/windowManager.ts";
-    import {defaultWindowConfigs} from "../lib/windowConfigs.ts";
-
     const CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
     const activeAnimations = new WeakMap();
 
@@ -82,6 +79,34 @@ const navItems = [
         });
 
         targets.forEach(el => shuffleText(el));
+
+        // Mobile nav hamburger menu
+        const overlay = document.querySelector('.mobile-nav-overlay');
+        const menuBtn = document.querySelector('.mobile-menu-btn');
+        const closeBtn = document.querySelector('.mobile-nav-close');
+        const backdrop = document.querySelector('.mobile-nav-backdrop');
+        const navLinks = document.querySelectorAll('.mobile-nav-links [data-window-name]');
+
+        function openMenu() {
+            if (!overlay) return;
+            overlay.classList.add('is-open');
+            overlay.setAttribute('aria-hidden', 'false');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeMenu() {
+            if (!overlay) return;
+            overlay.classList.remove('is-open');
+            overlay.setAttribute('aria-hidden', 'true');
+            document.body.style.overflow = '';
+        }
+
+        if (menuBtn) menuBtn.addEventListener('click', openMenu);
+        if (closeBtn) closeBtn.addEventListener('click', closeMenu);
+        if (backdrop) backdrop.addEventListener('click', closeMenu);
+        navLinks.forEach(link => link.addEventListener('click', () => {
+            setTimeout(closeMenu, 150);
+        }));
     });
 </script>
 
@@ -98,6 +123,7 @@ const navItems = [
         </span>
 
         <nav class="header-nav" data-tutorial="header-nav">
+            <SearchBar client:load />
             {navItems.map(item => (
                     <NavItem
                             label={item.label}
@@ -106,8 +132,43 @@ const navItems = [
                     />
             ))}
         </nav>
+
+        <div class="mobile-search-btn">
+            <SearchBar client:load />
+        </div>
+        <button class="mobile-menu-btn" aria-label="Open menu">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="3" y1="6" x2="21" y2="6" />
+                <line x1="3" y1="12" x2="21" y2="12" />
+                <line x1="3" y1="18" x2="21" y2="18" />
+            </svg>
+        </button>
     </div>
 </header>
+
+<div class="mobile-nav-overlay" aria-hidden="true">
+    <div class="mobile-nav-backdrop"></div>
+    <div class="mobile-nav-panel">
+        <div class="mobile-nav-header">
+            <span class="mobile-nav-title">Menu</span>
+            <button class="mobile-nav-close" aria-label="Close menu">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="18" y1="6" x2="6" y2="18" />
+                    <line x1="6" y1="6" x2="18" y2="18" />
+                </svg>
+            </button>
+        </div>
+        <nav class="mobile-nav-links">
+            {navItems.map(item => (
+                <NavItem
+                    label={item.label}
+                    windowName={item.windowName}
+                    client:load
+                />
+            ))}
+        </nav>
+    </div>
+</div>
 
 <style lang="scss">
     .site-header {
@@ -194,21 +255,166 @@ const navItems = [
     }
 
 
+    /* Hamburger button — hidden on desktop */
+    .mobile-menu-btn {
+        display: none;
+        background: none;
+        border: none;
+        padding: 0;
+        cursor: pointer;
+        color: #ffffff;
+        mix-blend-mode: difference;
+        opacity: 0.7;
+        transition: opacity 0.2s ease;
+        -webkit-tap-highlight-color: transparent;
+
+        &:hover,
+        &:active {
+            opacity: 1;
+        }
+    }
+
+    /* Mobile search button — hidden on desktop */
+    .mobile-search-btn {
+        display: none;
+    }
+
+    /* Mobile nav overlay */
+    .mobile-nav-overlay {
+        display: none;
+        position: fixed;
+        inset: 0;
+        z-index: 2000;
+        pointer-events: none;
+        opacity: 0;
+        transition: opacity 0.25s ease;
+
+        &.is-open {
+            pointer-events: auto;
+            opacity: 1;
+        }
+    }
+
+    .mobile-nav-backdrop {
+        position: absolute;
+        inset: 0;
+        -webkit-backdrop-filter: blur(20px);
+      box-shadow:
+              0 12px 48px rgba(0, 0, 0, 0.12),
+              0 4px 16px rgba(0, 0, 0, 0.08);
+      backdrop-filter: blur(20px);
+    }
+
+    .mobile-nav-panel {
+        position: absolute;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        width: 280px;
+        max-width: 80vw;
+        box-shadow:
+              0 12px 48px rgba(0, 0, 0, 0.12),
+              0 4px 16px rgba(0, 0, 0, 0.08);
+        backdrop-filter: blur(20px);
+        display: flex;
+        flex-direction: column;
+        transform: translateX(100%);
+        transition: transform 0.3s cubic-bezier(0.32, 0.72, 0, 1);
+    }
+
+    .mobile-nav-overlay.is-open .mobile-nav-panel {
+        transform: translateX(0);
+    }
+
+    .mobile-nav-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 16px 20px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    }
+
+    .mobile-nav-title {
+        font-family: Gentle, sans-serif;
+        font-size: 0.875rem;
+        color: rgba(255, 255, 255, 0.5);
+        letter-spacing: 0.05em;
+        text-transform: uppercase;
+    }
+
+    .mobile-nav-close {
+        background: none;
+        border: none;
+        padding: 4px;
+        cursor: pointer;
+        color: rgba(255, 255, 255, 0.6);
+        transition: color 0.15s ease;
+        -webkit-tap-highlight-color: transparent;
+
+        &:hover,
+        &:active {
+            color: #ffffff;
+        }
+    }
+
+    .mobile-nav-links {
+        display: flex;
+        flex-direction: column;
+        padding: 12px 0;
+
+        :global(.navItem),
+        :global([data-window-name]) {
+            display: block;
+            padding: 14px 24px;
+            font-size: 1.125rem;
+            color: rgba(255, 255, 255, 0.85) !important;
+            opacity: 1 !important;
+            mix-blend-mode: normal !important;
+            transition: background 0.15s ease;
+
+            &:hover,
+            &:active {
+                background: rgba(255, 255, 255, 0.06);
+            }
+        }
+    }
+
     @media (max-width: 768px) {
         .header-container {
-            grid-template-columns: 1fr;
-            gap: 1rem;
-            padding: 1rem 1.5rem;
+            grid-template-columns: 1fr auto auto;
+            gap: 0;
+            padding: 10px 16px;
         }
 
-        .header-name,
-        .header-center,
-        .header-nav {
-            justify-self: center;
+        .header-center {
+            display: none;
+        }
+
+        .header-name {
+            justify-self: start;
         }
 
         .header-nav {
-            gap: 1.5rem;
+            display: none;
+        }
+
+        .mobile-search-btn {
+            display: flex;
+            align-items: center;
+            justify-self: end;
+        }
+
+        .mobile-menu-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 44px;
+            height: 44px;
+            justify-self: end;
+        }
+
+        .mobile-nav-overlay {
+            display: block;
         }
     }
 </style>

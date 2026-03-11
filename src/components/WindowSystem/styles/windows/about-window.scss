@@ -152,79 +152,41 @@ $text-grey: #666666;
 
 @media (max-width: 767px) {
   .portfolio-wrapper {
-    min-height: 100%; // Fill available space
+    min-height: 0;
     height: auto;
-    padding: 24px; // Simplified padding
+    padding: 16px;
     align-items: center;
-    overflow: auto; // Allow scroll if content is long
+    overflow: hidden;
 
     .center-content {
-      margin-top: 0; // Remove fixed margin
+      margin-top: 0;
       padding: 0;
       width: 100%;
       max-width: 100%;
 
       .greeting {
         font-size: 0.9rem;
-        margin-bottom: 8px;
+        margin-bottom: 4px;
       }
 
       .headline {
-        font-size: 2.4rem; // Slightly larger for impact
+        font-size: 1.6rem;
         line-height: 1.1;
-        margin: 12px 0;
+        margin: 4px 0;
       }
 
       .tagline {
-        font-size: 1rem;
-        margin: 12px 0 32px;
-        line-height: 1.5;
+        font-size: 0.85rem;
+        margin: 4px 0 12px;
+        line-height: 1.4;
         max-width: 280px;
       }
 
       .cta-btn {
         width: 100%;
-        max-width: 100%; // Full width button
-        padding: 16px;
-        font-size: 1.1rem;
-      }
-    }
-
-    .sticker-wrapper {
-      // Keep some stickers but make them smaller/static if possible, or hide for simplicity
-      display: none; 
-    }
-  }
-}
-
-  .portfolio-wrapper {
-    min-height: 520px;
-    padding: 56px 18px 24px;
-    justify-content: center;
-    align-items: flex-start;
-    overflow: clip;
-
-    .center-content {
-      margin-top: 64px;
-      padding: 0;
-
-      .greeting {
-        font-size: 0.95rem;
-      }
-
-      .headline {
-        font-size: 2.1rem;
-        line-height: 1.1;
-      }
-
-      .tagline {
-        font-size: 0.95rem;
-        margin: 12px 0 26px;
-      }
-
-      .cta-btn {
-        width: 100%;
-        max-width: 320px;
+        max-width: 100%;
+        padding: 12px;
+        font-size: 1rem;
       }
     }
 
@@ -234,15 +196,13 @@ $text-grey: #666666;
   }
 }
 
+
 @keyframes popIn {
   from {
     opacity: 0;
     scale: 0;
   }
-  to {
-    opacity: 1;
-    scale: 1;
-  }
+  to { opacity: 1; scale: 1; }
 }
 
 @keyframes entrance {
