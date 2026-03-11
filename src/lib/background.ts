@@ -3,13 +3,15 @@
 import * as THREE from "three";
 
 import shaderBufferA from "../assets/shaders/bufferA.glsl?raw";
-import shaderBufferB from "../assets/shaders/bufferB.glsl?raw";
 import shaderImage from "../assets/shaders/image.glsl?raw";
 
 const TARGET_FPS = 30;
-const FPS_SAMPLE_SIZE = 40;
-const RESOLUTION_SCALE_MIN = 0.3;
+const FRAME_INTERVAL_MS = 1000 / TARGET_FPS;
+const FPS_SAMPLE_SIZE = 60; // Larger sample size for smoother average
+const RESOLUTION_SCALE_MIN = 0.5; // Don't drop as low
 const RESOLUTION_SCALE_MAX = 1.0;
+const DESKTOP_MAX_PIXEL_RATIO = 1.5;
+const MOBILE_MAX_PIXEL_RATIO = 1.25;
 
 // Palette configuration
 const PALETTE_NAMES = ["Ocean", "Sunset", "Forest", "Aurora", "Neon"] as const;
@@ -22,7 +24,12 @@ let gl: WebGLRenderingContext | WebGL2RenderingContext | null = null;
 
 if (typeof window !== "undefined") {
 	canvas = document.querySelector<HTMLCanvasElement>("#shader")!;
-	renderer = new THREE.WebGLRenderer({ antialias: true, canvas });
+	renderer = new THREE.WebGLRenderer({
+		antialias: false,
+		alpha: false,
+		powerPreference: "high-performance",
+		canvas,
+	});
 	gl = renderer.getContext()!;
 	renderer.autoClear = false;
 }
@@ -31,7 +38,6 @@ const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, -1, 1);
 const quad = new THREE.PlaneGeometry(2, 2);
 
 const sceneA = new THREE.Scene();
-const sceneB = new THREE.Scene();
 const sceneImage = new THREE.Scene();
 
 /**
@@ -70,24 +76,21 @@ const uniformsA = {
 	iMorphProgress: { value: 0 },
 };
 
-const uniformsB = {
-	iResolution: { value: new THREE.Vector3() },
-	iChannel0: { value: null as unknown as THREE.Texture },
-	iTime: { value: 0 },
-	iScrollProgress: { value: 0 },
-};
-
 const uniformsImage = {
 	iResolution: { value: new THREE.Vector3() },
 	iChannel0: { value: null as unknown as THREE.Texture },
 	iScrollProgress: { value: 0 },
 };
 
+const resolutionUniform = new THREE.Vector3();
 const fpsHistory = new Array(FPS_SAMPLE_SIZE).fill(0);
 let fpsHistoryIndex = 0;
 let fpsHistoryCount = 0;
 let lastFrameTime = 0;
+let lastRenderTime = 0;
 let currentResolutionScale = 1.0;
+let pendingResize = true;
+let isDocumentVisible = true;
 
 let usingMobileGpu = false;
 if (typeof window !== "undefined" && gl) {
@@ -127,23 +130,23 @@ if (usingMobileGpu) {
 const shaderBufferAProlog = !usingMobileGpu
 	? /*glsl*/ `
         const float RAYMARCH_MIN_DIST = 0.3;
-        const float RAYMARCH_MAX_DIST = 50.0;
-        const float RAYMARCH_HIT_CUTOFF = 0.001;
-        const int RAYMARCH_MAX_ITERS = 32;
+        const float RAYMARCH_MAX_DIST = 35.0;
+        const float RAYMARCH_HIT_CUTOFF = 0.0025;
+        const int RAYMARCH_MAX_ITERS = 24;
     `
 	: /*glsl*/ `
         const float RAYMARCH_MIN_DIST = 0.3;
         const float RAYMARCH_MAX_DIST = 10.0;
-        const float RAYMARCH_HIT_CUTOFF = 0.01;
-        const int RAYMARCH_MAX_ITERS = 16;
+        const float RAYMARCH_HIT_CUTOFF = 0.02;
+        const int RAYMARCH_MAX_ITERS = 12;
     `;
 
 const shaderImageProlog = !usingMobileGpu
 	? /*glsl*/ `
-        const float BLOOM_SAMPLES = 16.0;
+        const float BLOOM_SAMPLES = 12.0;
     `
 	: /*glsl*/ `
-        const float BLOOM_SAMPLES = 32.0;
+        const float BLOOM_SAMPLES = 8.0;
     `;
 
 const matA = new THREE.ShaderMaterial({
@@ -157,15 +160,6 @@ const matA = new THREE.ShaderMaterial({
 	uniforms: uniformsA,
 });
 
-const matB = new THREE.ShaderMaterial({
-	fragmentShader: buildFrag({
-		needsChannel0: true,
-		needsTime: true,
-		source: shaderBufferB,
-	}),
-	uniforms: uniformsB,
-});
-
 const matImage = new THREE.ShaderMaterial({
 	fragmentShader: buildFrag({
 		needsChannel0: true,
@@ -175,30 +169,17 @@ const matImage = new THREE.ShaderMaterial({
 });
 
 sceneA.add(new THREE.Mesh(quad, matA));
-sceneB.add(new THREE.Mesh(quad, matB));
 sceneImage.add(new THREE.Mesh(quad, matImage));
 
 let rtA: THREE.WebGLRenderTarget;
-let rtB: THREE.WebGLRenderTarget;
-
-let actualMouseX = 0,
-	actualMouseY = 0;
 
 let lastTime = 0,
 	timeBasis = 0;
 
 if (typeof window !== "undefined" && renderer && canvas) {
 	rtA = makeRenderTarget()!;
-	rtB = makeRenderTarget()!;
 
-	uniformsB.iChannel0.value = rtA.texture;
-	uniformsImage.iChannel0.value = rtB.texture;
-
-	window.addEventListener("pointermove", (e) => {
-		const rect = canvas!.getBoundingClientRect();
-		actualMouseX = (e.clientX - rect.left) * (canvas!.width / rect.width);
-		actualMouseY = (rect.bottom - e.clientY) * (canvas!.height / rect.height);
-	});
+	uniformsImage.iChannel0.value = rtA.texture;
 
 	window.addEventListener("blur", () => {
 		// The shader goes kinda crazy with large values of t, reset them when the user switches tabs
@@ -208,17 +189,37 @@ if (typeof window !== "undefined" && renderer && canvas) {
 		}
 	});
 
+	window.addEventListener("resize", () => {
+		pendingResize = true;
+	});
+
+	document.addEventListener("visibilitychange", () => {
+		isDocumentVisible = !document.hidden;
+		if (isDocumentVisible) {
+			pendingResize = true;
+			lastFrameTime = 0;
+			lastRenderTime = 0;
+		}
+	});
+
 	requestAnimationFrame(render);
 }
 
 function resizeRendererToDisplaySize(r: THREE.WebGLRenderer) {
 	const c = r.domElement;
-	const dpr = typeof window !== "undefined" ? window.devicePixelRatio : 1;
-	const width = Math.floor(
-		c.clientWidth * dpr * currentResolutionScale,
+	const dpr = typeof window !== "undefined"
+		? Math.min(
+				window.devicePixelRatio || 1,
+				usingMobileGpu ? MOBILE_MAX_PIXEL_RATIO : DESKTOP_MAX_PIXEL_RATIO,
+			)
+		: 1;
+	const width = Math.max(
+		1,
+		Math.floor(c.clientWidth * dpr * currentResolutionScale),
 	);
-	const height = Math.floor(
-		c.clientHeight * dpr * currentResolutionScale,
+	const height = Math.max(
+		1,
+		Math.floor(c.clientHeight * dpr * currentResolutionScale),
 	);
 	const needResize = c.width !== width || c.height !== height;
 
@@ -247,27 +248,26 @@ function makeRenderTarget() {
 function updateResUniforms() {
 	if (!renderer) return;
 	const { width, height } = renderer.domElement;
-	const res = new THREE.Vector3(width, height, 1);
-	uniformsA.iResolution.value.copy(res);
-	uniformsB.iResolution.value.copy(res);
-	uniformsImage.iResolution.value.copy(res);
+	resolutionUniform.set(width, height, 1);
+	uniformsA.iResolution.value.copy(resolutionUniform);
+	uniformsImage.iResolution.value.copy(resolutionUniform);
 }
 
 function onResize() {
-	if (!renderer) return;
+	if (!renderer || !pendingResize) return;
+	pendingResize = false;
 	if (resizeRendererToDisplaySize(renderer)) {
 		rtA?.dispose();
-		rtB?.dispose();
 		const newRtA = makeRenderTarget();
-		const newRtB = makeRenderTarget();
-		if (newRtA && newRtB) {
+		if (newRtA) {
 			rtA = newRtA;
-			rtB = newRtB;
-			uniformsB.iChannel0.value = rtA.texture;
-			uniformsImage.iChannel0.value = rtB.texture;
+			uniformsImage.iChannel0.value = rtA.texture;
 			updateResUniforms();
 		}
+		return;
 	}
+
+	updateResUniforms();
 }
 
 function measureFPS(currentTime: number) {
@@ -297,17 +297,19 @@ function measureFPS(currentTime: number) {
 function adjustResolution(averageFPS: number) {
 	let targetScale = currentResolutionScale;
 
-	if (averageFPS < TARGET_FPS * 0.9) {
-		targetScale = Math.max(currentResolutionScale * 0.95, RESOLUTION_SCALE_MIN);
+	// Be more patient and use smaller adjustment steps
+	if (averageFPS < TARGET_FPS * 0.7) { // Only drop if well below target
+		targetScale = Math.max(currentResolutionScale * 0.98, RESOLUTION_SCALE_MIN);
 	} else if (
-		averageFPS > TARGET_FPS * 1.1 &&
+		averageFPS > TARGET_FPS * 0.95 && // Be more aggressive about going back up
 		currentResolutionScale < RESOLUTION_SCALE_MAX
 	) {
-		targetScale = Math.min(currentResolutionScale * 1.02, RESOLUTION_SCALE_MAX);
+		targetScale = Math.min(currentResolutionScale * 1.01, RESOLUTION_SCALE_MAX);
 	}
 
-	if (Math.abs(targetScale - currentResolutionScale) > 0.02) {
+	if (Math.abs(targetScale - currentResolutionScale) > 0.01) {
 		currentResolutionScale = targetScale;
+		pendingResize = true;
 		console.log(
 			`Resolution scale adjusted to ${currentResolutionScale.toFixed(2)} (FPS: ${averageFPS.toFixed(1)})`,
 		);
@@ -349,21 +351,29 @@ function updateTransition(timeSeconds: number) {
 }
 
 function render(timeMs: number) {
-	if (!renderer || !rtA || !rtB) return;
+	if (!renderer || !rtA) return;
+
+	if (!isDocumentVisible) {
+		requestAnimationFrame(render);
+		return;
+	}
+
+	if (lastRenderTime !== 0 && timeMs - lastRenderTime < FRAME_INTERVAL_MS) {
+		requestAnimationFrame(render);
+		return;
+	}
+
+	lastRenderTime = timeMs;
 	measureFPS(timeMs);
 
 	lastTime = timeMs;
 	const timeSeconds = (timeMs - timeBasis) * 0.001;
 
 	onResize();
-	updateResUniforms();
 	updateTransition(timeSeconds);
 
 	uniformsA.iTime.value = timeSeconds;
-	uniformsB.iTime.value = timeSeconds;
 
-	// Slow movement based on time
-	scrollProgress = (timeSeconds * 0.02) % 2.0;
 	const slowMovementX = Math.sin(timeSeconds * 0.05) * 200;
 	const slowMovementY = Math.cos(timeSeconds * 0.04) * 200;
 
@@ -373,11 +383,7 @@ function render(timeMs: number) {
 	renderer.setRenderTarget(rtA);
 	renderer.render(sceneA, camera);
 
-	// Pass B (reads A) -> rtB
-	renderer.setRenderTarget(rtB);
-	renderer.render(sceneB, camera);
-
-	// Final Image (reads B) -> screen
+	// Final Image (reads A) -> screen
 	renderer.setRenderTarget(null);
 	renderer.render(sceneImage, camera);
 

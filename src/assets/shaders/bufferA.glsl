@@ -149,10 +149,9 @@ float sdTorus(vec3 p, vec2 t) {
 // Smoother, more organic displacement using multiple sine waves
 float sdDisplacementOrganic(vec3 p, float time) {
     float d = 0.0;
-    // Layer multiple frequencies for organic feel
+    // Keep two lower-frequency layers to preserve the shape without the extra high-frequency trig cost.
     d += sin(1.5 * p.x + time * 0.05) * sin(1.8 * p.y + time * 0.03) * sin(1.5 * p.z + time * 0.04);
-    d += 0.5 * sin(3.0 * p.x - time * 0.02) * sin(2.8 * p.y - time * 0.015) * sin(3.2 * p.z + time * 0.02);
-    d += 0.25 * sin(5.0 * p.x + time * 0.01) * cos(4.5 * p.y) * sin(4.8 * p.z - time * 0.005);
+    d += 0.45 * sin(3.0 * p.x - time * 0.02) * sin(2.8 * p.y - time * 0.015) * sin(3.2 * p.z + time * 0.02);
     return d;
 }
 
@@ -177,8 +176,8 @@ float sdScene(vec3 p) {
     // Smoother rotation with organic movement
     float rotSpeed = iTime * animSpeed;
     torusPos = rotateX(torusPos, DEG2RAD * 20.0 + sin(iTime * 0.02) * 0.05);
-    torusPos = rotateZ(torusPos, DEG2RAD * mod(-25.0 + rotSpeed, 360.0));
-    
+    torusPos = rotateZ(torusPos, DEG2RAD * (-25.0 + rotSpeed));
+
     // Gentle twist variation over time
     float twistAmount = 1.0 + (87.0 / 15.0) + sin(iTime * 0.03) * 0.3;
     torusPos = transformTwist(torusPos, twistAmount);
@@ -223,7 +222,7 @@ void mainImage(out vec4 out_fragColor, in vec2 fragCoord) {
     if (dist > RAYMARCH_MAX_DIST) {
         // Soft glow for background
         float glowStrength = 1.0 - clamp01(minDist);
-        glowStrength = pow(glowStrength, 1.5);
+        glowStrength *= sqrt(glowStrength);
         color = getPaletteColor(minDist * 0.8) * glowStrength;
     } else {
         vec3 p = ro + (rd * dist);
