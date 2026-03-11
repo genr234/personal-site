@@ -1,6 +1,5 @@
 import { useComputed } from "@preact/signals";
 import { hiddenWindowHeaders } from "../../lib/windowManager";
-import { ArrowLeft } from "lucide-preact";
 import styles from "./styles/window.module.scss";
 
 interface WindowHeaderProps {
@@ -9,7 +8,6 @@ interface WindowHeaderProps {
 	icon: string;
 	onClose: () => void;
 	onMinimize: () => void;
-	onBack?: () => void;
 	onMouseDown?: (e: MouseEvent) => void;
 	isDragging?: boolean;
 	variant?: "default" | "seamless";
@@ -18,18 +16,27 @@ interface WindowHeaderProps {
 }
 
 export function WindowHeader({
-	id,
-	color,
-	icon,
-	onClose,
-	onMinimize,
-	onMouseDown,
-	onBack,
-	isDragging,
-	variant = "default",
-}: WindowHeaderProps) {
+								 id,
+								 color,
+								 icon,
+								 onClose,
+								 onMinimize,
+								 onMouseDown,
+								 isDragging,
+								 variant = "default",
+								 headerBackground,
+								 headerTextColor,
+							 }: WindowHeaderProps) {
 	const isHidden = useComputed(() => hiddenWindowHeaders.value.has(id));
 	if (isHidden.value) return null;
+
+	const headerStyle =
+		variant === "seamless"
+			? ({
+				"--header-bg": headerBackground || "transparent",
+				"--header-text": headerTextColor || "#fff",
+			} as any)
+			: {};
 
 	return (
 		<header
@@ -40,23 +47,10 @@ export function WindowHeader({
 			]
 				.filter(Boolean)
 				.join(" ")}
+			style={headerStyle}
 			onMouseDown={onMouseDown}
 		>
-			<div class={styles.headerLeft}>
-				{onBack && (
-					<button
-						type="button"
-						class={styles.backButton}
-						onClick={(e) => {
-							e.stopPropagation();
-							onBack();
-						}}
-						aria-label="Back"
-					>
-						<ArrowLeft size={16} />
-					</button>
-				)}
-			</div>
+			<div class={styles.headerLeft}></div>
 			<div class={styles.headerRight}>
 				<button
 					type="button"
@@ -84,3 +78,4 @@ export function WindowHeader({
 		</header>
 	);
 }
+

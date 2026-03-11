@@ -1,10 +1,11 @@
 .navItem {
-	text-decoration: none !important; /* force no underline */
-	color: #ffffff;
+	text-decoration: none !important;
+	/* force no underline */
+	color: white;
 	font-size: 0.9375rem;
 	position: relative;
 	transition: opacity 0.2s ease, color 0.15s ease;
-	opacity: 0.6l;
+	opacity: 0.6;
 	letter-spacing: 0.01em;
 	font-variant-numeric: tabular-nums;
 	display: inline-block;
@@ -14,10 +15,12 @@
 	&::after {
 		content: '';
 		position: absolute;
-		bottom: -3px; /* slightly more space */
+		bottom: -3px;
+		/* slightly more space */
 		left: 0;
 		right: 0;
-		height: 2px; /* thicker line when visible */
+		height: 2px;
+		/* thicker line when visible */
 		background: currentColor;
 		transform-origin: center;
 		transform: scaleX(0);
@@ -28,6 +31,7 @@
 
 	&:hover {
 		opacity: 1;
+
 		&::after {
 			transform: scaleX(1);
 			opacity: 1;
@@ -39,7 +43,7 @@
 	text-decoration: none !important;
 	opacity: 1;
 	color: white;
-	font-weight: 600;
+
 	&::after {
 		opacity: 1;
 		background: white;

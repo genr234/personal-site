@@ -36,11 +36,7 @@ $text-grey: #666666;
 
       .sticker-img {
         filter:
-          drop-shadow(2px 0 0 white)
-          drop-shadow(-2px 0 0 white)
-          drop-shadow(0 2px 0 white)
-          drop-shadow(0 -2px 0 white)
-          drop-shadow(0 20px 30px rgba(0,0,0,0.25));
+          drop-shadow(2px 0 0 white) drop-shadow(-2px 0 0 white) drop-shadow(0 2px 0 white) drop-shadow(0 -2px 0 white) drop-shadow(0 20px 30px rgba(0, 0, 0, 0.25));
       }
     }
 
@@ -50,23 +46,14 @@ $text-grey: #666666;
       display: block;
       pointer-events: none;
       filter:
-        drop-shadow(2px 0 0 white)
-        drop-shadow(-2px 0 0 white)
-        drop-shadow(0 2px 0 white)
-        drop-shadow(0 -2px 0 white)
-        drop-shadow(2px 2px 0 white)
-        drop-shadow(0 5px 10px rgba(0,0,0,0.1));
+        drop-shadow(2px 0 0 white) drop-shadow(-2px 0 0 white) drop-shadow(0 2px 0 white) drop-shadow(0 -2px 0 white) drop-shadow(2px 2px 0 white) drop-shadow(0 5px 10px rgba(0, 0, 0, 0.1));
 
       transition: filter 0.2s ease;
     }
 
     &:hover .sticker-img {
       filter:
-        drop-shadow(2px 0 0 white)
-        drop-shadow(-2px 0 0 white)
-        drop-shadow(0 2px 0 white)
-        drop-shadow(0 -2px 0 white)
-        drop-shadow(0 8px 15px rgba(0,0,0,0.15));
+        drop-shadow(2px 0 0 white) drop-shadow(-2px 0 0 white) drop-shadow(0 2px 0 white) drop-shadow(0 -2px 0 white) drop-shadow(0 8px 15px rgba(0, 0, 0, 0.15));
     }
   }
 
@@ -145,7 +132,7 @@ $text-grey: #666666;
       &:hover {
         transform: translateY(-3px);
         border-color: $primary-green;
-        box-shadow: 0 8px 20px rgba(0,0,0,0.05);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
         color: $primary-green;
       }
 
@@ -158,7 +145,7 @@ $text-grey: #666666;
 
 @media (max-width: 767px) {
   .contact-wrapper {
-    padding: 16px;
+    padding: 20px 30px;
     height: auto;
     min-height: 0;
     align-items: center;
@@ -201,6 +188,7 @@ $text-grey: #666666;
     opacity: 0;
     scale: 0;
   }
+
   to {
     opacity: 1;
     scale: 1;
@@ -208,6 +196,13 @@ $text-grey: #666666;
 }
 
 @keyframes fadeUp {
-  from { opacity: 0; transform: translateY(15px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(15px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }

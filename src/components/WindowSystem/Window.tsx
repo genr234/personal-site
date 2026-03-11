@@ -159,6 +159,8 @@ export function Window({ windowState }: Props) {
 				id={id}
 				icon={icon}
 				color={color}
+				headerBackground={headerBackground}
+				headerTextColor={headerTextColor}
 				onClose={() => closeWindow(id)}
 				onMinimize={() => minimizeWindow(id)}
 				onMouseDown={handleMouseDown}

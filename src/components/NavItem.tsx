@@ -22,6 +22,16 @@ export default function NavItem({ label, windowName }: NavItemProps) {
 		}
 	};
 
+	const handleKeyDown = (e: KeyboardEvent) => {
+		if (e.key === "Enter" || e.key === " ") {
+			e.preventDefault();
+			const config = defaultWindowConfigs.find((c) => c.id === windowName);
+			if (config) {
+				createWindow(config);
+			}
+		}
+	};
+
 	const className = `${styles.navItem} ${isWindowOpen.value ? styles.active : ""}`.trim();
 
 	return (
@@ -29,6 +39,9 @@ export default function NavItem({ label, windowName }: NavItemProps) {
 			className={className}
 			data-window-name={windowName}
 			onClick={handleClick}
+			onKeyDown={handleKeyDown}
+			role="button"
+			tabIndex={0}
             data-cursor-target="true"
 		>
 			{label}
