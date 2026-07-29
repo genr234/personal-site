@@ -3,22 +3,41 @@ import Layout from "../layouts/Layout.astro";
 import { WindowManager } from "../components/WindowSystem/WindowManager.tsx";
 import { TutorialDialogue } from "../components/Tutorial/TutorialDialogue.tsx";
 import { CommandPalette } from "../components/CommandPalette.tsx";
+import { BadApplePlayer } from "../components/BadApple/BadApplePlayer.tsx";
 import {createWindow} from "../lib/windowManager.ts";
 import {defaultWindowConfigs} from "../lib/windowConfigs.ts";
 ---
 
 <Layout>
     <script>
-        import {randomPalette} from "../lib/background.ts";
+        import {randomPalette, toggleShaderBackground} from "../lib/background.ts";
+
+        const konamiCode = [
+            "ArrowUp", "ArrowUp", "ArrowDown", "ArrowDown",
+            "ArrowLeft", "ArrowRight", "ArrowLeft", "ArrowRight", "b", "a",
+        ];
+        let konamiProgress = 0;
 
         document.addEventListener("keydown", (e) => {
             if (e.key === "Shift") {
                 randomPalette();
             }
+
+            const key = e.key.toLowerCase();
+            const expectedKey = konamiCode[konamiProgress].toLowerCase();
+            konamiProgress = key === expectedKey
+                ? konamiProgress + 1
+                : key === konamiCode[0].toLowerCase() ? 1 : 0;
+
+            if (konamiProgress === konamiCode.length) {
+                toggleShaderBackground();
+                konamiProgress = 0;
+            }
         })
     </script>
     <canvas id="shader"></canvas>
     <WindowManager client:load />
+    <BadApplePlayer client:load />
     <CommandPalette client:load />
         <TutorialDialogue client:load steps={[
             {

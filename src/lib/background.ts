@@ -17,6 +17,17 @@ const MOBILE_MAX_PIXEL_RATIO = 1.25;
 const PALETTE_NAMES = ["Ocean", "Sunset", "Forest", "Aurora", "Neon"] as const;
 
 const PALETTE_COUNT = PALETTE_NAMES.length;
+const BACKGROUND_PREFERENCE_KEY = "genr235.shader-background";
+
+type BackgroundPreference = {
+	shaderEnabled: boolean;
+	color: string;
+};
+
+const DEFAULT_BACKGROUND_PREFERENCE: BackgroundPreference = {
+	shaderEnabled: true,
+	color: "#ff4fd8",
+};
 
 let canvas: HTMLCanvasElement | null = null;
 let renderer: THREE.WebGLRenderer | null = null;
@@ -32,6 +43,58 @@ if (typeof window !== "undefined") {
 	});
 	gl = renderer.getContext()!;
 	renderer.autoClear = false;
+}
+
+function randomBrightColor(): string {
+	return `hsl(${Math.floor(Math.random() * 360)} 100% 62%)`;
+}
+
+function readBackgroundPreference(): BackgroundPreference {
+	try {
+		const stored = window.localStorage.getItem(BACKGROUND_PREFERENCE_KEY);
+		if (!stored) return DEFAULT_BACKGROUND_PREFERENCE;
+		const parsed = JSON.parse(stored) as Partial<BackgroundPreference>;
+		return {
+			shaderEnabled: parsed.shaderEnabled !== false,
+			color: typeof parsed.color === "string" ? parsed.color : DEFAULT_BACKGROUND_PREFERENCE.color,
+		};
+	} catch {
+		return DEFAULT_BACKGROUND_PREFERENCE;
+	}
+}
+
+function saveBackgroundPreference(preference: BackgroundPreference): void {
+	try {
+		window.localStorage.setItem(BACKGROUND_PREFERENCE_KEY, JSON.stringify(preference));
+	} catch {
+		// Keep the background usable when storage is unavailable.
+	}
+}
+
+let backgroundPreference = typeof window !== "undefined"
+	? readBackgroundPreference()
+	: DEFAULT_BACKGROUND_PREFERENCE;
+
+function applyBackgroundPreference(): void {
+	if (!canvas || typeof document === "undefined") return;
+	canvas.style.display = backgroundPreference.shaderEnabled ? "block" : "none";
+	document.body.style.backgroundColor = backgroundPreference.shaderEnabled
+		? ""
+		: backgroundPreference.color;
+}
+
+if (typeof window !== "undefined") {
+	applyBackgroundPreference();
+}
+
+export function toggleShaderBackground(): boolean {
+	backgroundPreference = {
+		shaderEnabled: !backgroundPreference.shaderEnabled,
+		color: backgroundPreference.shaderEnabled ? backgroundPreference.color : randomBrightColor(),
+	};
+	applyBackgroundPreference();
+	saveBackgroundPreference(backgroundPreference);
+	return backgroundPreference.shaderEnabled;
 }
 
 const camera = new THREE.OrthographicCamera(-1, 1, 1, -1, -1, 1);

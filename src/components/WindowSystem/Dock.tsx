@@ -1,4 +1,5 @@
 import { useState } from "preact/hooks";
+import { badApplePlaying, requestBadAppleToggle } from "../../lib/badApple/state";
 import type {
 	DockItemConfig,
 	WindowConfig,
@@ -51,6 +52,16 @@ export function Dock({ appItems, minimizedWindows, onItemClick }: DockProps) {
 			onClick: () => onItemClick(window.id),
 			isActive: true,
 		})),
+		{
+			id: "bad-apple",
+			type: "app" as const,
+			icon: "Film",
+			label: "Bad Apple",
+			color: "#111111",
+			onClick: requestBadAppleToggle,
+			isActive: badApplePlaying.value,
+			shownByDefault: true,
+		},
 	];
 
 	return (
