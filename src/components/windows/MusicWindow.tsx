@@ -1,6 +1,11 @@
 import { useEffect, useRef, useState } from "preact/hooks";
 import playlistData from "../../data/playlist.json";
 import { setWindowHeaderHidden } from "../../lib/windowManager";
+import {
+	getYoutubeIdFromUrl,
+	loadYouTubeIframeApi,
+	youtubeThumbnailUrl,
+} from "../../lib/youtube";
 import "../WindowSystem/styles/windows/music-window.scss";
 import {
 	FastForwardIcon,
@@ -18,9 +23,8 @@ import {
 interface Track {
 	title: string;
 	artist: string;
-	cover: string;
-	url: string;
-	video?: string; // YouTube URL for background video
+	video: string;
+	cover?: string;
 }
 
 interface Playlist {
@@ -47,10 +51,14 @@ export function MusicWindow() {
 		trackIdx: number;
 	} | null>(null);
 
-	const audioRef = useRef<HTMLAudioElement>(null);
-	const youtubeFrameRef = useRef<HTMLIFrameElement>(null);
-	const [isYoutubeReady, setIsYoutubeReady] = useState(false);
-	const lastSyncedVideoIdRef = useRef<string | null>(null);
+	const playerHostRef = useRef<HTMLDivElement>(null);
+	const playerRef = useRef<YT.Player | null>(null);
+	const [playerReady, setPlayerReady] = useState(false);
+	const [embedError, setEmbedError] = useState(false);
+	const isPlayingRef = useRef(false);
+	const volumeRef = useRef(volume);
+	const currentVideoIdRef = useRef<string | null>(null);
+	const nextTrackRef = useRef<() => void>(() => {});
 	const vinylRefMap = useRef(new Map<string, HTMLDivElement>());
 	const albumTargetRef = useRef<HTMLDivElement>(null);
 	const [flyingVinyl, setFlyingVinyl] = useState<{
@@ -63,31 +71,15 @@ export function MusicWindow() {
 		currentPlaylistIdx
 	] as Playlist;
 	const currentTrack = currentPlaylist.tracks[currentTrackIdx];
-
-	const getYoutubeIdFromUrl = (url?: string) => {
-		if (!url) return null;
-		try {
-			const parsed = new URL(url);
-			if (parsed.hostname === "youtu.be") {
-				const id = parsed.pathname.replace(/^\//, "");
-				return id || null;
-			}
-			const v = parsed.searchParams.get("v");
-			if (v) return v;
-			const pathParts = parsed.pathname.split("/").filter(Boolean);
-			const embedIdx = pathParts.indexOf("embed");
-			if (embedIdx >= 0 && pathParts[embedIdx + 1])
-				return pathParts[embedIdx + 1];
-			const shortsIdx = pathParts.indexOf("shorts");
-			if (shortsIdx >= 0 && pathParts[shortsIdx + 1])
-				return pathParts[shortsIdx + 1];
-			return null;
-		} catch {
-			return null;
-		}
-	};
-
 	const currentVideoId = getYoutubeIdFromUrl(currentTrack.video);
+	const currentCover =
+		currentTrack.cover ||
+		(currentVideoId ? youtubeThumbnailUrl(currentVideoId) : "");
+
+	const trackCover = (track: Track) => {
+		const id = getYoutubeIdFromUrl(track.video);
+		return track.cover || (id ? youtubeThumbnailUrl(id) : "");
+	};
 
 	const changeTrack = (playlistIdx: number, trackIdx: number) => {
 		if (
@@ -149,7 +141,7 @@ export function MusicWindow() {
 			const track = playlistData.playlists[playlistIdx].tracks[
 				trackIdx
 			] as Track;
-			setFlyingVinyl({ cover: track.cover, from, to });
+			setFlyingVinyl({ cover: trackCover(track), from, to });
 		}
 
 		setSelectedVinyl({ playlistIdx, trackIdx });
@@ -169,7 +161,7 @@ export function MusicWindow() {
 			const track = playlistData.playlists[playlistIdx].tracks[
 				trackIdx
 			] as Track;
-			setFlyingVinyl({ cover: track.cover, from, to });
+			setFlyingVinyl({ cover: trackCover(track), from, to });
 		}
 
 		e.dataTransfer?.setData(
@@ -211,22 +203,9 @@ export function MusicWindow() {
 		}
 	};
 
-	useEffect(() => {
-		if (audioRef.current) {
-			audioRef.current.volume = volume;
-			if (isPlaying && !isChanging) {
-				const playPromise = audioRef.current.play();
-				if (playPromise !== undefined) {
-					playPromise.catch(() => {
-						// Auto-play was prevented
-						setIsPlaying(false);
-					});
-				}
-			} else {
-				audioRef.current.pause();
-			}
-		}
-	}, [isPlaying, volume, currentTrackIdx, isChanging]);
+	isPlayingRef.current = isPlaying;
+	volumeRef.current = volume;
+	currentVideoIdRef.current = currentVideoId;
 
 	useEffect(() => {
 		setWindowHeaderHidden("music", Boolean(isPlaying && currentVideoId));
@@ -234,83 +213,98 @@ export function MusicWindow() {
 	}, [isPlaying, currentVideoId]);
 
 	useEffect(() => {
-		const iframe = youtubeFrameRef.current;
-		if (!iframe) return;
+		let cancelled = false;
+		const host = playerHostRef.current;
+		if (!host) return;
 
-		setIsYoutubeReady(false);
-		const onMessage = (event: MessageEvent) => {
-			if (event.source !== iframe.contentWindow) return;
-			if (typeof event.data !== "string") return;
-			try {
-				const data = JSON.parse(event.data);
-				if (data?.event === "onReady") {
-					setIsYoutubeReady(true);
-				}
-			} catch {
-				// ignore
-			}
-		};
-
-		window.addEventListener("message", onMessage);
-		return () => window.removeEventListener("message", onMessage);
-	}, [currentVideoId]);
-
-	useEffect(() => {
-		const iframe = youtubeFrameRef.current;
-		const audio = audioRef.current;
-		if (!iframe || !audio || !isYoutubeReady || !currentVideoId) return;
-
-		const post = (func: string, args: unknown[] = []) => {
-			iframe.contentWindow?.postMessage(
-				JSON.stringify({
-					event: "command",
-					func,
-					args,
-				}),
-				"*",
-			);
-		};
-
-		if (isPlaying) post("playVideo");
-		else post("pauseVideo");
-	}, [isPlaying, isYoutubeReady, currentVideoId]);
-
-	useEffect(() => {
-		const iframe = youtubeFrameRef.current;
-		const audio = audioRef.current;
-		if (!iframe || !audio) return;
-		if (!currentVideoId) return;
-
-		const post = (func: string, args: unknown[] = []) => {
-			iframe.contentWindow?.postMessage(
-				JSON.stringify({
-					event: "command",
-					func,
-					args,
-				}),
-				"*",
-			);
-		};
-
-		const syncToAudio = () => {
-			if (!isYoutubeReady) return;
-			const t = audio.currentTime || 0;
-			post("seekTo", [t, true]);
-		};
-
-		const onSeeking = () => syncToAudio();
-		audio.addEventListener("seeking", onSeeking);
-
-		const interval = window.setInterval(() => {
-			if (!isPlaying) return;
-			syncToAudio();
-		}, 5000);
+		loadYouTubeIframeApi()
+			.then(() => {
+				if (cancelled || playerRef.current || !playerHostRef.current) return;
+				playerRef.current = new YT.Player(playerHostRef.current, {
+					playerVars: {
+						autoplay: 0,
+						controls: 0,
+						disablekb: 1,
+						fs: 0,
+						modestbranding: 1,
+						playsinline: 1,
+						rel: 0,
+						iv_load_policy: 3,
+						origin: window.location.origin,
+					},
+					events: {
+						onReady: (event) => {
+							event.target.setVolume(Math.round(volumeRef.current * 100));
+							setPlayerReady(true);
+							setEmbedError(false);
+							if (isPlayingRef.current) event.target.playVideo();
+						},
+						onStateChange: (event) => {
+							if (event.data === 0) {
+								nextTrackRef.current();
+							}
+						},
+						onError: () => {
+							setEmbedError(true);
+							setIsPlaying(false);
+						},
+					},
+				});
+			})
+			.catch(() => {
+				if (!cancelled) setEmbedError(true);
+			});
 
 		return () => {
-			audio.removeEventListener("seeking", onSeeking);
-			window.clearInterval(interval);
+			cancelled = true;
+			setPlayerReady(false);
+			playerRef.current?.destroy();
+			playerRef.current = null;
 		};
-	}, [currentVideoId, isPlaying, isYoutubeReady]);
+	}, []);
+
+	useEffect(() => {
+		const player = playerRef.current;
+		if (!player || !playerReady || !currentVideoId) return;
+		setEmbedError(false);
+		setProgress(0);
+		if (isPlaying && !isChanging) {
+			player.loadVideoById(currentVideoId);
+		} else {
+			player.cueVideoById(currentVideoId);
+		}
+		player.setVolume(Math.round(volume * 100));
+	}, [currentVideoId, playerReady]);
+
+	useEffect(() => {
+		const player = playerRef.current;
+		if (!player || !playerReady || isChanging) return;
+		if (isPlaying) player.playVideo();
+		else player.pauseVideo();
+	}, [isPlaying, playerReady, isChanging]);
+
+	useEffect(() => {
+		playerRef.current?.setVolume(Math.round(volume * 100));
+	}, [volume]);
+
+	useEffect(() => {
+		if (!isPlaying || !playerReady) return;
+		const id = window.setInterval(() => {
+			const player = playerRef.current;
+			if (!player) return;
+			const duration = player.getDuration() || 0;
+			const current = player.getCurrentTime() || 0;
+			const percent =
+				duration > 0 && Number.isFinite(duration)
+					? (current / duration) * 100
+					: 0;
+			const clamped = Number.isFinite(percent)
+				? Math.max(0, Math.min(100, percent))
+				: 0;
+			setProgress(clamped);
+		}, 250);
+		return () => window.clearInterval(id);
+	}, [isPlaying, playerReady, currentVideoId]);
 
 	const togglePlay = () => {
 		setIsPlaying(!isPlaying);
@@ -320,6 +314,7 @@ export function MusicWindow() {
 		const nextIdx = (currentTrackIdx + 1) % currentPlaylist.tracks.length;
 		changeTrack(currentPlaylistIdx, nextIdx);
 	};
+	nextTrackRef.current = nextTrack;
 
 	const prevTrack = () => {
 		const prevIdx =
@@ -329,35 +324,15 @@ export function MusicWindow() {
 		changeTrack(currentPlaylistIdx, prevIdx);
 	};
 
-	const handleTimeUpdate = () => {
-		const audio = audioRef.current;
-		if (!audio) return;
-
-		const current = audio.currentTime;
-		const duration = audio.duration || 0;
-		const percent =
-			duration > 0 && Number.isFinite(duration)
-				? (current / duration) * 100
-				: 0;
-		if (percent === 100) {
-			nextTrack();
-		}
-
-		const clamped = Number.isFinite(percent)
-			? Math.max(0, Math.min(100, percent))
-			: 0;
-		setProgress(clamped);
-	};
-
 	const handleSeek = (e: Event) => {
 		const target = e.target as HTMLInputElement;
 		const val = Number(target.value); // expected 0..100 (percent)
 
-		// If audio is available and has a valid duration, update playback position
-		if (audioRef.current) {
-			const duration = audioRef.current.duration || 0;
+		const player = playerRef.current;
+		if (player && playerReady) {
+			const duration = player.getDuration() || 0;
 			if (duration > 0 && Number.isFinite(duration)) {
-				audioRef.current.currentTime = (val / 100) * duration;
+				player.seekTo((val / 100) * duration, true);
 			}
 		}
 
@@ -424,7 +399,7 @@ export function MusicWindow() {
 
 									return (
 										<div
-											key={track.url}
+											key={track.video}
 											ref={(el) => {
 												const key = `${pIdx}:${tIdx}`;
 												if (el) vinylRefMap.current.set(key, el);
@@ -438,7 +413,7 @@ export function MusicWindow() {
 											title={track.title}
 										>
 											<div className="vinyl-sleeve">
-												<img src={track.cover} alt={track.title} />
+												<img src={trackCover(track as Track)} alt={track.title} />
 												<div className="vinyl-disc-peek" />
 											</div>
 											<span className="vinyl-name">{track.title}</span>
@@ -456,31 +431,12 @@ export function MusicWindow() {
 				</div>
 			</div>
 
-			<audio
-				ref={audioRef}
-				src={currentTrack.url}
-				onTimeUpdate={handleTimeUpdate}
-				onEnded={nextTrack}
-			/>
-
-			{(() => {
-				if (!currentVideoId) return null;
-				const src = `https://www.youtube.com/embed/${currentVideoId}?enablejsapi=1&origin=${encodeURIComponent(window.location.origin)}&autoplay=1&mute=1&controls=0&loop=1&playlist=${currentVideoId}&modestbranding=1&playsinline=1&rel=0&iv_load_policy=3`;
-				return (
-					<div
-						className={`player-video-bg ${isPlaying ? "playing" : ""}`}
-						aria-hidden="true"
-					>
-						<iframe
-							ref={youtubeFrameRef}
-							title="Background video"
-							src={src}
-							allow="autoplay; encrypted-media;"
-							referrerPolicy="strict-origin-when-cross-origin"
-						/>
-					</div>
-				);
-			})()}
+			<div
+				className={`player-video-bg ${isPlaying && currentVideoId ? "playing" : ""}`}
+				aria-hidden="true"
+			>
+				<div ref={playerHostRef} />
+			</div>
 
 			<div
 				className={`player-body ${dragOver ? "drag-over" : ""} ${selectedVinyl ? "waiting-for-drop" : ""}`}
@@ -518,7 +474,7 @@ export function MusicWindow() {
 							<div className="vinyl-grooves" />
 							<div
 								className="vinyl-label"
-								style={{ backgroundImage: `url(${currentTrack.cover})` }}
+								style={{ backgroundImage: `url(${currentCover})` }}
 							/>
 						</div>
 					)}
@@ -531,7 +487,11 @@ export function MusicWindow() {
 								<div
 									className="vinyl-label-ghost"
 									style={{
-										backgroundImage: `url(${getSelectedTrack()?.cover})`,
+										backgroundImage: `url(${
+											getSelectedTrack()
+												? trackCover(getSelectedTrack() as Track)
+												: ""
+										})`,
 									}}
 								/>
 							</div>
@@ -544,6 +504,18 @@ export function MusicWindow() {
 						<h3 className="track-title">{currentTrack.title}</h3>
 					</div>
 					<p className="track-artist">{currentTrack.artist}</p>
+					{embedError && (
+						<p className="track-embed-error">
+							This track can’t play here.{" "}
+							<a
+								href={currentTrack.video}
+								target="_blank"
+								rel="noreferrer"
+							>
+								Open on YouTube
+							</a>
+						</p>
+					)}
 				</div>
 
 				<div className="controls-area">

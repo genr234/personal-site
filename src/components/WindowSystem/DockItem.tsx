@@ -1,12 +1,12 @@
 import styles from "./styles/dock.module.scss";
 import type { DockItemConfig } from "../../lib/types";
-import {icons, type LucideIcon} from "lucide-preact";
+import { iconMap, type IconName } from "../../lib/icons";
 
 interface DockItemProps extends DockItemConfig {
 	scale: number;
 	onMouseEnter?: () => void;
 	onMouseLeave?: () => void;
-    icon: keyof typeof icons;
+	icon: IconName;
 }
 
 export function DockItem({
@@ -19,10 +19,11 @@ export function DockItem({
 	onMouseEnter,
 	onMouseLeave,
 }: DockItemProps) {
-    const DockIcon = icons[icon];
+	const DockIcon = iconMap[icon];
 
 	return (
 		<button
+			type="button"
 			class={[styles.dockItem, isActive && styles.active]
 				.filter(Boolean)
 				.join(" ")}

@@ -16,9 +16,18 @@ import Header from "../components/Header.astro";
         <script data-collect-dnt="true" async src="https://scripts.simpleanalyticscdn.com/latest.js" type="text/partytown"></script>
           <link rel="sitemap" href="/sitemap-index.xml" />
         <meta name="generator" content={Astro.generator} />
-        <script src="../lib/background.ts" />
         <script>
-            document.addEventListener("DOMContentLoaded", (e) => {
+            import { startShaderBackground } from "../lib/backgroundControls.ts";
+
+            const start = () => startShaderBackground();
+            if ("requestIdleCallback" in window) {
+                window.requestIdleCallback(start, { timeout: 1500 });
+            } else {
+                globalThis.setTimeout(start, 200);
+            }
+        </script>
+        <script>
+            document.addEventListener("DOMContentLoaded", () => {
                 const favicon = document.getElementById("favicon")! as HTMLLinkElement;
                 let frame = 0;
 
@@ -60,18 +69,22 @@ import Header from "../components/Header.astro";
     @font-face {
         font-family: Gentle;
         src: url(/fonts/gentle.otf);
+        font-display: swap;
     }
     @font-face {
         font-family: Nano;
         src: url(/fonts/nano.ttf);
+        font-display: swap;
     }
     @font-face {
         font-family: Cutta;
         src: url(/fonts/cutta-bold.otf);
+        font-display: swap;
     }
     @font-face {
         font-family: Jack;
         src: url(/fonts/jack.ttf);
+        font-display: swap;
     }
     :root {
         font-family: Inter, sans-serif;
@@ -99,4 +112,5 @@ import Header from "../components/Header.astro";
     body.window-dragging * {
         cursor: grabbing !important;
     }
+
 </style>

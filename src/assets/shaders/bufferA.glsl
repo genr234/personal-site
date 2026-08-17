@@ -146,13 +146,9 @@ float sdTorus(vec3 p, vec2 t) {
     return length(q) - t.y;
 }
 
-// Smoother, more organic displacement using multiple sine waves
+// One displacement band is enough for the silhouette; extra layers were mostly noise cost.
 float sdDisplacementOrganic(vec3 p, float time) {
-    float d = 0.0;
-    // Keep two lower-frequency layers to preserve the shape without the extra high-frequency trig cost.
-    d += sin(1.5 * p.x + time * 0.05) * sin(1.8 * p.y + time * 0.03) * sin(1.5 * p.z + time * 0.04);
-    d += 0.45 * sin(3.0 * p.x - time * 0.02) * sin(2.8 * p.y - time * 0.015) * sin(3.2 * p.z + time * 0.02);
-    return d;
+    return sin(1.5 * p.x + time * 0.05) * sin(1.8 * p.y + time * 0.03) * sin(1.5 * p.z + time * 0.04);
 }
 
 /*----------------------*\
@@ -232,6 +228,15 @@ void mainImage(out vec4 out_fragColor, in vec2 fragCoord) {
     // Subtle ambient glow
     float ambientGlow = exp(-minDist * 2.0) * 0.15;
     color += getPaletteColor(iTime * 0.01) * ambientGlow;
+
+    // Filmic remap only. Vignette must use screen NDC, not aspect-corrected
+    // camera UVs — those go past ±1 on wide screens and draw a dark box.
+    color = color / (color + 0.5);
+    color *= 1.5;
+    vec2 ndc = (fragCoord / iResolution.xy) * 2.0 - 1.0;
+    vec2 edge = max(1.0 - ndc * ndc, 0.0);
+    float vignette = pow(edge.x * edge.y, 0.25);
+    color *= mix(0.7, 1.0, vignette);
 
     out_fragColor = vec4(clamp01(color), 1);
 }

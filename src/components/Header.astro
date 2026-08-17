@@ -2,18 +2,17 @@
 // Header.astro
 
 import NavItem from "./NavItem.tsx";
-import { SearchBar } from "./SearchBar.tsx";
 
 interface Props {
 	currentPath?: string;
 	centerText?: string;
 }
 
-const { currentPath = "/", centerText = "" } = Astro.props;
+const { centerText = "" } = Astro.props;
 
 const navItems = [
-	{ label: "Blog", windowName: "blog" },
 	{ label: "About", windowName: "about" },
+	{ label: "Projects", windowName: "projects" },
 	{ label: "Contact", windowName: "contact" },
 ];
 ---
@@ -91,19 +90,43 @@ const navItems = [
             if (!overlay) return;
             overlay.classList.add('is-open');
             overlay.setAttribute('aria-hidden', 'false');
+            menuBtn?.setAttribute('aria-expanded', 'true');
             document.body.style.overflow = 'hidden';
+            closeBtn?.focus();
         }
 
         function closeMenu() {
             if (!overlay) return;
             overlay.classList.remove('is-open');
             overlay.setAttribute('aria-hidden', 'true');
+            menuBtn?.setAttribute('aria-expanded', 'false');
             document.body.style.overflow = '';
+            menuBtn?.focus();
         }
 
         if (menuBtn) menuBtn.addEventListener('click', openMenu);
         if (closeBtn) closeBtn.addEventListener('click', closeMenu);
         if (backdrop) backdrop.addEventListener('click', closeMenu);
+        document.addEventListener('keydown', (event) => {
+            if (event.key === 'Escape' && overlay?.classList.contains('is-open')) {
+                closeMenu();
+            }
+        });
+        overlay?.addEventListener('keydown', (event) => {
+            if (event.key !== 'Tab') return;
+            const focusable = Array.from(overlay.querySelectorAll('a, button'))
+                .filter((element) => !element.hasAttribute('disabled'));
+            if (focusable.length === 0) return;
+            const first = focusable[0];
+            const last = focusable[focusable.length - 1];
+            if (event.shiftKey && document.activeElement === first) {
+                event.preventDefault();
+                last.focus();
+            } else if (!event.shiftKey && document.activeElement === last) {
+                event.preventDefault();
+                first.focus();
+            }
+        });
         navLinks.forEach(link => link.addEventListener('click', () => {
             setTimeout(closeMenu, 150);
         }));
@@ -123,7 +146,6 @@ const navItems = [
         </span>
 
         <nav class="header-nav" data-tutorial="header-nav">
-            <SearchBar client:load />
             {navItems.map(item => (
                     <NavItem
                             label={item.label}
@@ -133,10 +155,7 @@ const navItems = [
             ))}
         </nav>
 
-        <div class="mobile-search-btn">
-            <SearchBar client:load />
-        </div>
-        <button class="mobile-menu-btn" aria-label="Open menu">
+        <button class="mobile-menu-btn" aria-label="Open menu" aria-expanded="false" aria-controls="mobile-navigation">
             <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <line x1="3" y1="6" x2="21" y2="6" />
                 <line x1="3" y1="12" x2="21" y2="12" />
@@ -146,7 +165,7 @@ const navItems = [
     </div>
 </header>
 
-<div class="mobile-nav-overlay" aria-hidden="true">
+<div class="mobile-nav-overlay" id="mobile-navigation" aria-hidden="true">
     <div class="mobile-nav-backdrop"></div>
     <div class="mobile-nav-panel">
         <div class="mobile-nav-header">
@@ -276,11 +295,6 @@ const navItems = [
         }
     }
 
-    /* Mobile search button — hidden on desktop */
-    .mobile-search-btn {
-        display: none;
-    }
-
     /* Mobile nav overlay */
     .mobile-nav-overlay {
         display: none;
@@ -383,7 +397,7 @@ const navItems = [
 
     @media (max-width: 768px) {
         .header-container {
-            grid-template-columns: 1fr auto auto;
+            grid-template-columns: 1fr auto;
             gap: 0;
             padding: 10px 16px;
         }
@@ -398,12 +412,6 @@ const navItems = [
 
         .header-nav {
             display: none;
-        }
-
-        .mobile-search-btn {
-            display: flex;
-            align-items: center;
-            justify-self: end;
         }
 
         .mobile-menu-btn {

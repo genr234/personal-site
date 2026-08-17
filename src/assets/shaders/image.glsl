@@ -26,21 +26,26 @@ void mainImage(out vec4 out_fragColor, in vec2 fragCoord) {
     vec2 uv = (fragCoord / res) * 2.0 - 1.0;
 
     vec4 center = texture(iChannel0, fragCoord * texel) * bloomBase;
-    vec4 bloom = vec4(0.0);
-    float invSamples = 1.0 / BLOOM_SAMPLES;
-    vec2 direction = vec2(1.0, 0.0);
+    vec4 bloom = center;
 
-    for (float i = 0.0; i < BLOOM_SAMPLES; i += 1.0) {
-        direction *= -GOLDEN_ROT;
+    // Bloom is unused until scroll progress is driven; skip the sample loop when glow is 0.
+    if (bloomGlow > 0.001 && BLOOM_SAMPLES > 0.5) {
+        vec4 bloomAcc = vec4(0.0);
+        float invSamples = 1.0 / BLOOM_SAMPLES;
+        vec2 direction = vec2(1.0, 0.0);
 
-        float sampleT = (i + 0.5) * invSamples;
-        float weight = 1.0 - sampleT * sampleT;
-        vec2 coord = (fragCoord + direction * (sampleT * BLOOM_RADIUS)) * texel;
+        for (float i = 0.0; i < BLOOM_SAMPLES; i += 1.0) {
+            direction *= -GOLDEN_ROT;
 
-        bloom += texture(iChannel0, coord) * weight;
+            float sampleT = (i + 0.5) * invSamples;
+            float weight = 1.0 - sampleT * sampleT;
+            vec2 coord = (fragCoord + direction * (sampleT * BLOOM_RADIUS)) * texel;
+
+            bloomAcc += texture(iChannel0, coord) * weight;
+        }
+
+        bloom = bloomAcc * (bloomGlow * invSamples) + center;
     }
-
-    bloom = bloom * (bloomGlow * invSamples) + center;
     bloom.rgb = bloom.rgb / (bloom.rgb + 0.5);
     bloom.rgb *= 1.5;
 

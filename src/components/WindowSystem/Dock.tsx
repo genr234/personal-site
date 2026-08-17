@@ -46,7 +46,7 @@ export function Dock({ appItems, minimizedWindows, onItemClick }: DockProps) {
 		...minimizedWindows.map((window) => ({
 			id: window.id,
 			type: "minimized-window" as const,
-			icon: "File",
+			icon: "File" as const,
 			label: window.title,
 			color: window.color,
 			onClick: () => onItemClick(window.id),
@@ -55,7 +55,7 @@ export function Dock({ appItems, minimizedWindows, onItemClick }: DockProps) {
 		{
 			id: "bad-apple",
 			type: "app" as const,
-			icon: "Film",
+			icon: "Film" as const,
 			label: "Bad Apple",
 			color: "#111111",
 			onClick: requestBadAppleToggle,

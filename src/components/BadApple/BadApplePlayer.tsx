@@ -228,12 +228,12 @@ export function BadApplePlayer() {
 
 	return (
 		<>
-			<audio ref={audioRef} preload="auto" onEnded={stop} />
+			<audio ref={audioRef} preload="none" onEnded={stop} />
 			<div
 				class={[styles.stage, visible && styles.stageVisible].filter(Boolean).join(" ")}
 				aria-hidden="true"
 			>
-				{Array.from({ length: HARD_WINDOW_CAP }, (_, index) => (
+				{visible && Array.from({ length: HARD_WINDOW_CAP }, (_, index) => (
 					<div
 						key={index}
 						ref={(node) => {

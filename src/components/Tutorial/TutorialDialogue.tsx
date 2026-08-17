@@ -4,7 +4,7 @@ import {
 	useRef,
 	useState,
 } from "preact/hooks";
-import { setPalette, setPaletteImmediate } from "../../lib/background.ts";
+import { setPalette, setPaletteImmediate } from "../../lib/backgroundControls.ts";
 import styles from "./styles/tutorial.module.scss";
 import {createWindow} from "../../lib/windowManager.ts";
 import {defaultWindowConfigs} from "../../lib/windowConfigs.ts";
@@ -475,8 +475,6 @@ export function TutorialDialogue({
 		if (currentStepIndex > 0) setCurrentStepIndex((p) => p - 1);
 	}, [currentStepIndex]);
 
-	if (!isVisible) return null;
-
 	const isLastStep = currentStepIndex === steps.length - 1;
 	const isFirstStep = currentStepIndex === 0;
 
@@ -509,6 +507,8 @@ export function TutorialDialogue({
 		spotlight,
 		calculatePosition,
 	]);
+
+	if (!isVisible || !currentStep) return null;
 
 	const tailClass =
 		position.tailDir === "left"
@@ -592,6 +592,7 @@ export function TutorialDialogue({
 						<div class={styles.dots}>
 							{steps.map((_, i) => (
 								<span
+									key={steps[i].id}
 									class={`${styles.dot} ${
 										i === currentStepIndex
 											? styles.active
@@ -603,6 +604,15 @@ export function TutorialDialogue({
 							))}
 						</div>
 						<div class={styles.btns}>
+							{isFirstStep && (
+								<button
+									type="button"
+									class={`${styles.btn} ${styles.btnGhost}`}
+									onClick={closeTutorial}
+								>
+									No thanks
+								</button>
+							)}
 							{currentStepIndex > 0 && (
 								<button
 									type="button"
@@ -620,7 +630,13 @@ export function TutorialDialogue({
 									currentStep.kind === "palette" && selectedPaletteIndex == null
 								}
 							>
-								{isTyping ? "Skip" : isLastStep ? "Bye Bye!" : "Next"}
+								{isTyping
+									? "Skip"
+									: isFirstStep
+										? "Yes, show me"
+										: isLastStep
+											? "Bye Bye!"
+											: "Next"}
 							</button>
 						</div>
 					</div>
@@ -639,7 +655,10 @@ export function TutorialDialogue({
 				>
 					<img
 						src={`/bongo${bongoFrame}.png`}
-						alt="Bongo Cat"
+						alt=""
+						aria-hidden="true"
+						width="110"
+						height="110"
 						draggable={false}
 					/>
 				</div>

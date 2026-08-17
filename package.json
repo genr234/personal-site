@@ -7,7 +7,10 @@
 		"build": "astro build",
 		"preview": "astro preview",
 		"astro": "astro",
-		"test": "vitest"
+		"check": "astro check",
+		"lint": "astro check",
+		"format": "biome format --write src",
+		"test": "vitest run"
 	},
 	"dependencies": {
 		"@astrojs/mdx": "^4.3.13",
@@ -23,8 +26,10 @@
 		"three": "^0.181.2"
 	},
 	"devDependencies": {
+		"@astrojs/check": "^0.9.10",
 		"@astrojs/preact": "^4.0.8",
 		"@types/three": "^0.181.0",
+		"typescript": "5.9.3",
 		"vitest": "3.0.5"
 	}
 }

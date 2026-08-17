@@ -26,9 +26,7 @@ export default function NavItem({ label, windowName }: NavItemProps) {
 		if (e.key === "Enter" || e.key === " ") {
 			e.preventDefault();
 			const config = defaultWindowConfigs.find((c) => c.id === windowName);
-			if (config) {
-				createWindow(config);
-			}
+			if (config) createWindow(config);
 		}
 	};
 
@@ -42,7 +40,7 @@ export default function NavItem({ label, windowName }: NavItemProps) {
 			onKeyDown={handleKeyDown}
 			role="button"
 			tabIndex={0}
-            data-cursor-target="true"
+			data-cursor-target="true"
 		>
 			{label}
 		</div>

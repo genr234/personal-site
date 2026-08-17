@@ -57,6 +57,17 @@
   }
 }
 
+.track-embed-error {
+  margin: 0.4rem 0 0;
+  font-size: 0.75rem;
+  opacity: 0.85;
+
+  a {
+    color: #fff;
+    text-decoration: underline;
+  }
+}
+
 .playlist-toggle {
   position: absolute;
   top: 1rem;

@@ -4,10 +4,9 @@ import styles from "./styles/window.module.scss";
 
 interface WindowHeaderProps {
 	id: string;
-	color: string;
-	icon: string;
 	onClose: () => void;
 	onMinimize: () => void;
+	onBack?: () => void;
 	onMouseDown?: (e: MouseEvent) => void;
 	isDragging?: boolean;
 	variant?: "default" | "seamless";
@@ -16,11 +15,10 @@ interface WindowHeaderProps {
 }
 
 export function WindowHeader({
-								 id,
-								 color,
-								 icon,
-								 onClose,
-								 onMinimize,
+									 id,
+									 onClose,
+									 onMinimize,
+									 onBack,
 								 onMouseDown,
 								 isDragging,
 								 variant = "default",
@@ -50,7 +48,13 @@ export function WindowHeader({
 			style={headerStyle}
 			onMouseDown={onMouseDown}
 		>
-			<div class={styles.headerLeft}></div>
+			<div class={styles.headerLeft}>
+				{onBack && (
+					<button type="button" class={styles.minimizeButton} onClick={onBack} aria-label="Back">
+						←
+					</button>
+				)}
+			</div>
 			<div class={styles.headerRight}>
 				<button
 					type="button"
@@ -78,4 +82,3 @@ export function WindowHeader({
 		</header>
 	);
 }
-

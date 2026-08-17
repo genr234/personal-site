@@ -1,3 +1,5 @@
+@use "sass:color";
+
 $bg-color: #F9F8F6;
 $primary-orange: #FF5900;
 $secondary-blue: #001666;
@@ -20,58 +22,6 @@ $text-grey: #666666;
   justify-content: center;
   align-items: center;
   font-family: 'DM Sans', sans-serif;
-
-  .sticker-wrapper {
-    position: absolute;
-    top: 0;
-    left: 0;
-    cursor: grab;
-    touch-action: none;
-    opacity: 0;
-    animation: popIn 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
-
-    transition: transform 0.1s linear;
-
-    &.dragging {
-      cursor: grabbing;
-      transition: none;
-
-      .sticker-img {
-        filter:
-                drop-shadow(2px 0 0 white)
-                drop-shadow(-2px 0 0 white)
-                drop-shadow(0 2px 0 white)
-                drop-shadow(0 -2px 0 white)
-                drop-shadow(0 20px 30px rgba(0,0,0,0.25));
-      }
-    }
-
-    .sticker-img {
-      width: 100%;
-      height: auto;
-      display: block;
-      pointer-events: none;
-
-      filter:
-              drop-shadow(2px 0 0 white)
-              drop-shadow(-2px 0 0 white)
-              drop-shadow(0 2px 0 white)
-              drop-shadow(0 -2px 0 white)
-              drop-shadow(2px 2px 0 white)
-              drop-shadow(0 5px 10px rgba(0,0,0,0.1));
-
-      transition: filter 0.2s ease;
-    }
-
-    &:hover .sticker-img {
-      filter:
-              drop-shadow(2px 0 0 white)
-              drop-shadow(-2px 0 0 white)
-              drop-shadow(0 2px 0 white)
-              drop-shadow(0 -2px 0 white)
-              drop-shadow(0 8px 15px rgba(0,0,0,0.15));
-    }
-  }
 
   .center-content {
     z-index: 1;
@@ -111,27 +61,35 @@ $text-grey: #666666;
       @include appear-animation(fadeUp, 0.3s);
     }
 
-    .cta-btn {
-      background-color: $primary-orange;
-      color: white;
-      border: none;
-      padding: 12px 32px;
-      font-size: 1rem;
-      border-radius: 50px;
-      cursor: pointer;
+    .cta-row {
       display: flex;
-      align-items: center;
+      flex-wrap: wrap;
       justify-content: center;
       gap: 10px;
-      font-family: 'DM Sans', sans-serif;
-      transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-      @include appear-animation(fadeUp, 0.5s);
+      width: 100%;
       pointer-events: auto;
-      box-shadow: 0 4px 15px rgba($primary-orange, 0.3);
+      @include appear-animation(fadeUp, 0.5s);
+    }
+
+    .cta-btn,
+    .work-link {
+      border: none;
+      padding: 12px 22px;
+      font-size: 1rem;
+      font-weight: 600;
+      border-radius: 50px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      font-family: 'DM Sans', sans-serif;
+      transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275),
+        box-shadow 0.3s ease, background-color 0.3s ease;
 
       .arrow {
-        width: 20px;
-        height: 20px;
+        width: 18px;
+        height: 18px;
         display: flex;
         align-items: center;
         justify-content: center;
@@ -139,12 +97,32 @@ $text-grey: #666666;
 
       &:hover {
         transform: translateY(-3px);
-        box-shadow: 0 8px 25px rgba($primary-orange, 0.4);
-        background-color: darken($primary-orange, 5%);
       }
 
       &:active {
         transform: translateY(-1px);
+      }
+    }
+
+    .cta-btn {
+      background-color: $primary-orange;
+      color: white;
+      box-shadow: 0 4px 15px rgba($primary-orange, 0.3);
+
+      &:hover {
+        box-shadow: 0 8px 25px rgba($primary-orange, 0.4);
+        background-color: color.adjust($primary-orange, $lightness: -5%);
+      }
+    }
+
+    .work-link {
+      background-color: $light-blue;
+      color: $secondary-blue;
+      box-shadow: 0 4px 15px rgba($secondary-blue, 0.08);
+
+      &:hover {
+        box-shadow: 0 8px 20px rgba($secondary-blue, 0.12);
+        background-color: color.adjust($light-blue, $lightness: -4%);
       }
     }
   }
@@ -182,27 +160,19 @@ $text-grey: #666666;
         max-width: 280px;
       }
 
-      .cta-btn {
+      .cta-row {
+        flex-direction: column;
+      }
+
+      .cta-btn,
+      .work-link {
         width: 100%;
         max-width: 100%;
         padding: 12px;
         font-size: 1rem;
       }
     }
-
-    .sticker-wrapper {
-      display: none;
-    }
   }
-}
-
-
-@keyframes popIn {
-  from {
-    opacity: 0;
-    scale: 0;
-  }
-  to { opacity: 1; scale: 1; }
 }
 
 @keyframes entrance {

@@ -7,7 +7,6 @@ import {
 	hiddenWindowHeaders,
 	expandWindow,
 	expandedWindowId,
-	collapseWindow,
 	mobileMode,
 	minimizeWindow,
 	updateWindowPosition,
@@ -20,25 +19,7 @@ interface Props {
 	windowState: WindowState;
 }
 
-function getWindowContent(id: string, color: string) {
-	const contentStyles = {
-		fontFamily: "Inter, sans-serif",
-		color: "#1a1a1a",
-		height: "100%",
-	};
-
-	const headingStyles = {
-		fontSize: "24px",
-		fontWeight: "600",
-		marginBottom: "16px",
-		color: color,
-	};
-
-	const paragraphStyles = {
-		lineHeight: "1.6",
-		marginBottom: "12px",
-	};
-
+function getWindowContent(id: string) {
 	return <WindowContent windowId={id} />;
 }
 
@@ -47,7 +28,6 @@ export function Window({ windowState }: Props) {
 		id,
 		title,
 		color,
-		icon,
 		width,
 		height,
 		x,
@@ -153,12 +133,10 @@ export function Window({ windowState }: Props) {
 				focusWindow(id);
 			}}
 			role="dialog"
-			aria-labelledby={`window-title-${id}`}
+			aria-label={title}
 		>
-			<WindowHeader
-				id={id}
-				icon={icon}
-				color={color}
+				<WindowHeader
+					id={id}
 				headerBackground={headerBackground}
 				headerTextColor={headerTextColor}
 				onClose={() => closeWindow(id)}
@@ -166,7 +144,6 @@ export function Window({ windowState }: Props) {
 				onMouseDown={handleMouseDown}
 				isDragging={isDragging}
 				variant={variant}
-				onBack={isMobile.value && isExpanded.value ? () => collapseWindow() : undefined}
 			/>
 			<div
 				class={[
@@ -176,7 +153,7 @@ export function Window({ windowState }: Props) {
 					.filter(Boolean)
 					.join(" ")}
 			>
-				{getWindowContent(id, color)}
+					{getWindowContent(id)}
 			</div>
 		</div>
 	);

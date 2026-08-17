@@ -36,6 +36,18 @@ export const defaultWindowConfigs: WindowConfig[] = [
         shownByDefault: false
 	},
 	{
+		id: "projects",
+		title: "Projects",
+		color: "#F9F8F6",
+		variant: "seamless",
+		icon: "Folder",
+		initialSize: { width: 780, height: 580 },
+		initialPosition: { x: 180, y: 100 },
+		headerBackground: "#F9F8F6",
+		headerTextColor: "#001666",
+		shownByDefault: false,
+	},
+	{
 		id: "contact",
 		title: "Contact",
 		color: "#059669",

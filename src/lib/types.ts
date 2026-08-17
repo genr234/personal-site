@@ -1,4 +1,4 @@
-import type {LucideIcon} from "lucide-preact";
+import type { IconName } from "./icons";
 
 export interface Position {
 	x: number;
@@ -14,7 +14,7 @@ export interface WindowConfig {
 	id: string;
 	title: string;
 	color: string;
-	icon: string;
+	icon: IconName;
 	initialPosition: Position;
 	initialSize: Size;
 	minSize?: Size;
@@ -39,7 +39,7 @@ export interface WindowState extends WindowConfig {
 export interface DockItemConfig {
 	id: string;
 	type: "app" | "minimized-window";
-	icon: string;
+	icon: IconName;
 	label: string;
 	color: string;
 	onClick: () => void;

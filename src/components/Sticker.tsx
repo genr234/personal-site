@@ -63,7 +63,7 @@ const Sticker = ({ src, initialX, initialY, initialRotate, delay, width = 120, c
             window.removeEventListener('pointermove', handlePointerMove);
             window.removeEventListener('pointerup', handlePointerUp);
         };
-    }, [isDragging]);
+    }, [isDragging, containerId]);
 
     return (
         <div
@@ -76,7 +76,7 @@ const Sticker = ({ src, initialX, initialY, initialRotate, delay, width = 120, c
                 width: `${width}px`
             }}
         >
-            <img src={src} className="sticker-img" draggable={false} alt="sticker" />
+            <img src={src} className="sticker-img" draggable={false} alt="" aria-hidden="true" width={width} height={width} />
         </div>
     );
 };

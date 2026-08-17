@@ -2,16 +2,11 @@
 import Layout from "../layouts/Layout.astro";
 import { WindowManager } from "../components/WindowSystem/WindowManager.tsx";
 import { TutorialDialogue } from "../components/Tutorial/TutorialDialogue.tsx";
-import { CommandPalette } from "../components/CommandPalette.tsx";
 import { BadApplePlayer } from "../components/BadApple/BadApplePlayer.tsx";
-import {createWindow} from "../lib/windowManager.ts";
-import {defaultWindowConfigs} from "../lib/windowConfigs.ts";
 ---
 
 <Layout>
     <script>
-        import {randomPalette, toggleShaderBackground} from "../lib/background.ts";
-
         const konamiCode = [
             "ArrowUp", "ArrowUp", "ArrowDown", "ArrowDown",
             "ArrowLeft", "ArrowRight", "ArrowLeft", "ArrowRight", "b", "a",
@@ -20,7 +15,9 @@ import {defaultWindowConfigs} from "../lib/windowConfigs.ts";
 
         document.addEventListener("keydown", (e) => {
             if (e.key === "Shift") {
-                randomPalette();
+                import("../lib/backgroundControls.ts").then(({ randomPalette }) => {
+                    randomPalette();
+                });
             }
 
             const key = e.key.toLowerCase();
@@ -30,19 +27,20 @@ import {defaultWindowConfigs} from "../lib/windowConfigs.ts";
                 : key === konamiCode[0].toLowerCase() ? 1 : 0;
 
             if (konamiProgress === konamiCode.length) {
-                toggleShaderBackground();
+                import("../lib/backgroundControls.ts").then(({ toggleShaderBackground }) => {
+                    toggleShaderBackground();
+                });
                 konamiProgress = 0;
             }
         })
     </script>
     <canvas id="shader"></canvas>
     <WindowManager client:load />
-    <BadApplePlayer client:load />
-    <CommandPalette client:load />
-        <TutorialDialogue client:load steps={[
+    <BadApplePlayer client:idle />
+        <TutorialDialogue client:idle steps={[
             {
                 id: "welcome",
-                text: "Hey there! Welcome to my little corner of the internet!",
+                text: "Hey there! Welcome to my little corner of the internet. Want a quick tour?",
             },
             {
                 id: "header",

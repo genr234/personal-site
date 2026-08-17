@@ -7,8 +7,8 @@ import shaderImage from "../assets/shaders/image.glsl?raw";
 
 const TARGET_FPS = 30;
 const FRAME_INTERVAL_MS = 1000 / TARGET_FPS;
-const FPS_SAMPLE_SIZE = 60; // Larger sample size for smoother average
-const RESOLUTION_SCALE_MIN = 0.5; // Don't drop as low
+const FPS_SAMPLE_SIZE = 60;
+const RESOLUTION_SCALE_MIN = 0.5;
 const RESOLUTION_SCALE_MAX = 1.0;
 const DESKTOP_MAX_PIXEL_RATIO = 1.5;
 const MOBILE_MAX_PIXEL_RATIO = 1.25;
@@ -115,7 +115,7 @@ function buildFrag(opts: {
 	needsMorph?: boolean;
 	source: string;
 }) {
-	const lines = ["#include <common>", "precision highp float;"];
+	const lines = ["#include <common>", "precision mediump float;"];
 
 	lines.push("uniform vec3 iResolution;");
 	if (opts.needsMouse) lines.push("uniform vec4 iMouse;");
@@ -193,23 +193,23 @@ if (usingMobileGpu) {
 const shaderBufferAProlog = !usingMobileGpu
 	? /*glsl*/ `
         const float RAYMARCH_MIN_DIST = 0.3;
-        const float RAYMARCH_MAX_DIST = 35.0;
-        const float RAYMARCH_HIT_CUTOFF = 0.0025;
-        const int RAYMARCH_MAX_ITERS = 24;
+        const float RAYMARCH_MAX_DIST = 24.0;
+        const float RAYMARCH_HIT_CUTOFF = 0.006;
+        const int RAYMARCH_MAX_ITERS = 16;
     `
 	: /*glsl*/ `
         const float RAYMARCH_MIN_DIST = 0.3;
         const float RAYMARCH_MAX_DIST = 10.0;
-        const float RAYMARCH_HIT_CUTOFF = 0.02;
-        const int RAYMARCH_MAX_ITERS = 12;
+        const float RAYMARCH_HIT_CUTOFF = 0.025;
+        const int RAYMARCH_MAX_ITERS = 8;
     `;
 
 const shaderImageProlog = !usingMobileGpu
 	? /*glsl*/ `
-        const float BLOOM_SAMPLES = 12.0;
+        const float BLOOM_SAMPLES = 6.0;
     `
 	: /*glsl*/ `
-        const float BLOOM_SAMPLES = 8.0;
+        const float BLOOM_SAMPLES = 0.0;
     `;
 
 const matA = new THREE.ShaderMaterial({
@@ -243,6 +243,18 @@ if (typeof window !== "undefined" && renderer && canvas) {
 	rtA = makeRenderTarget()!;
 
 	uniformsImage.iChannel0.value = rtA.texture;
+
+	try {
+		const saved = window.localStorage.getItem("palette");
+		if (saved != null) {
+			const idx = Number.parseInt(saved, 10);
+			if (!Number.isNaN(idx)) {
+				setPaletteImmediate(idx);
+			}
+		}
+	} catch {
+		// Ignore storage errors; default palette is fine.
+	}
 
 	window.addEventListener("blur", () => {
 		// The shader goes kinda crazy with large values of t, reset them when the user switches tabs
@@ -416,7 +428,7 @@ function updateTransition(timeSeconds: number) {
 function render(timeMs: number) {
 	if (!renderer || !rtA) return;
 
-	if (!isDocumentVisible) {
+	if (!isDocumentVisible || !backgroundPreference.shaderEnabled) {
 		requestAnimationFrame(render);
 		return;
 	}
@@ -442,13 +454,17 @@ function render(timeMs: number) {
 
 	uniformsA.iMouse.value.set(slowMovementX, slowMovementY, 0, 0);
 
-	// Pass A -> rtA
-	renderer.setRenderTarget(rtA);
-	renderer.render(sceneA, camera);
-
-	// Final Image (reads A) -> screen
-	renderer.setRenderTarget(null);
-	renderer.render(sceneImage, camera);
+	// Bloom is only useful once scroll progress is driven. Skip the extra
+	// full-screen pass and render-target blit until then.
+	if (uniformsA.iScrollProgress.value > 0.001) {
+		renderer.setRenderTarget(rtA);
+		renderer.render(sceneA, camera);
+		renderer.setRenderTarget(null);
+		renderer.render(sceneImage, camera);
+	} else {
+		renderer.setRenderTarget(null);
+		renderer.render(sceneA, camera);
+	}
 
 	requestAnimationFrame(render);
 }
