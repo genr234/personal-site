@@ -3,8 +3,8 @@
 	"type": "module",
 	"version": "0.0.1",
 	"scripts": {
-		"dev": "astro dev",
-		"build": "astro build",
+		"dev": "bun scripts/resize-project-images.ts && astro dev",
+		"build": "bun scripts/resize-project-images.ts && astro build",
 		"preview": "astro preview",
 		"astro": "astro",
 		"check": "astro check",
@@ -29,6 +29,7 @@
 		"@astrojs/check": "^0.9.10",
 		"@astrojs/preact": "^4.0.8",
 		"@types/three": "^0.181.0",
+		"sharp": "^0.35.5",
 		"typescript": "5.9.3",
 		"vitest": "3.0.5"
 	}

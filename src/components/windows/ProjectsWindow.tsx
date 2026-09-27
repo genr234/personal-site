@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "preact/hooks";
 import { ArrowLeft, ArrowRight, Code2, FolderKanban, Github } from "lucide-preact";
+import { projectImageSrcSet } from "../../lib/project-images.ts";
 import {
 	getWork,
 	stackIconSrc,
@@ -29,6 +30,28 @@ function ProjectIcon({ item }: { item: WorkItem }) {
 		return <FolderKanban className="project-icon-svg" size={16} aria-hidden="true" />;
 	}
 	return <Code2 className="project-icon-svg" size={16} aria-hidden="true" />;
+}
+
+function ProjectShotImg({
+	src,
+	variant,
+	className,
+}: {
+	src: string;
+	variant: "card" | "detail";
+	className: string;
+}) {
+	const srcSet = projectImageSrcSet(src);
+	return (
+		<img
+			className={className}
+			src={src}
+			alt=""
+			{...(srcSet
+				? { srcSet, sizes: variant === "detail" ? "720px" : "380px" }
+				: {})}
+		/>
+	);
 }
 
 function ProjectCarousel({
@@ -95,9 +118,11 @@ function ProjectCarousel({
 				onClick={onActivate}
 			>
 				{variant === "card" && outgoing.current && outgoing.current !== current ? (
-					<img className="is-outgoing" src={outgoing.current} alt="" />
+					<ProjectShotImg className="is-outgoing" src={outgoing.current} variant={variant} />
 				) : null}
-				{current ? <img key={current} className="is-incoming" src={current} alt="" /> : null}
+				{current ? (
+					<ProjectShotImg key={current} className="is-incoming" src={current} variant={variant} />
+				) : null}
 				{multi && variant === "detail" ? (
 					<>
 						<button

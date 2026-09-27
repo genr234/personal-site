@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { formatProjectSrcSet } from "./project-images";
 import { getWork, workInTag, workSlides, type WorkItem } from "./projects";
 
 const items: WorkItem[] = [
@@ -18,6 +19,17 @@ describe("workInTag", () => {
 describe("workSlides", () => {
 	it("returns the images list", () => {
 		expect(workSlides({ ...items[0], images: ["/a.png", "/b.png"] })).toEqual(["/a.png", "/b.png"]);
+	});
+});
+
+describe("formatProjectSrcSet", () => {
+	it("lists each resized file with its width", () => {
+		expect(
+			formatProjectSrcSet([
+				{ src: "/projects/display/640/shot.png", width: 640 },
+				{ src: "/projects/display/1280/shot.png", width: 1280 },
+			]),
+		).toBe("/projects/display/640/shot.png 640w, /projects/display/1280/shot.png 1280w");
 	});
 });
 
