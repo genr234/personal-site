@@ -41,6 +41,156 @@
                     "video": "https://www.youtube.com/watch?v=SZ_H0tpomxo"
                 }
 			]
+		},
+		{
+			"id": "2",
+			"name": "vocaloid",
+			"tracks": [
+				{
+					"title": "I am",
+					"artist": "Siinamota",
+					"cover": "https://i.scdn.co/image/ab67616d0000b273a89cda77ec382a3e365cb3f5",
+					"video": "https://www.youtube.com/watch?v=csBDF3m_91g"
+				},
+				{
+					"title": "DARLING",
+					"artist": "Maretu",
+					"cover": "https://i.scdn.co/image/ab67616d0000b273d4abef91d6409bc00351c1f6",
+					"video": "https://www.youtube.com/watch?v=YFg48Ai1SSo"
+				},
+				{
+					"title": "Heat Abnormal",
+					"artist": "renaseri",
+					"cover": "https://i.scdn.co/image/ab67616d0000b273284831123e8f4a0c13e18868",
+					"video": "https://www.youtube.com/watch?v=PUgeb7rBhxg"
+				},
+				{
+					"title": "Cutie Mew Mew Magic",
+					"artist": "Toby Fox, Camellia",
+					"cover": "https://i.scdn.co/image/ab67616d0000b273f2040bc37574c3f96727befd",
+					"video": "https://www.youtube.com/watch?v=tlFnfEWZCtQ"
+				},
+				{
+					"title": "Brain Rot",
+					"artist": "renaseri",
+					"cover": "https://i.scdn.co/image/ab67616d0000b27378dc521de76a57955202c651",
+					"video": "https://www.youtube.com/watch?v=18X2KwA_6bI"
+				},
+				{
+					"title": "Young Girl A",
+					"artist": "Siinamota",
+					"cover": "https://i.scdn.co/image/ab67616d0000b273a89cda77ec382a3e365cb3f5",
+					"video": "https://www.youtube.com/watch?v=AqI97zHMoQw"
+				},
+				{
+					"title": "hontono",
+					"artist": "Sasuke Haraguchi",
+					"cover": "https://i.scdn.co/image/ab67616d0000b27336ac2e25ca655580f4a250b5",
+					"video": "https://www.youtube.com/watch?v=1zpRpiau-Zg"
+				},
+				{
+					"title": "Lepido",
+					"artist": "カササギ",
+					"cover": "https://i.scdn.co/image/ab67616d0000b273f7c62b34fa9ecb8d25905b73",
+					"video": "https://www.youtube.com/watch?v=xm6BmNenFuo"
+				},
+				{
+					"title": "I'm Dying Alone, And That's Okay",
+					"artist": "FlightWish",
+					"cover": "https://i.scdn.co/image/ab67616d0000b273229732f40e370f913ff96078",
+					"video": "https://www.youtube.com/watch?v=txEU6VsCU9Q"
+				},
+				{
+					"title": "streetcat",
+					"artist": "FLAVOR FOLEY",
+					"cover": "https://i.scdn.co/image/ab67616d0000b273a653dd452980d7d596018045",
+					"video": "https://www.youtube.com/watch?v=jbZT-bwZD3c"
+				},
+				{
+					"title": "White Letter",
+					"artist": "GonGoss",
+					"cover": "https://i.scdn.co/image/ab67616d0000b273d99e796da0126ae81e2cb8e4",
+					"video": "https://www.youtube.com/watch?v=OHL2xJX7jzM"
+				},
+				{
+					"title": "Lovexcretion",
+					"artist": "PEPOYO",
+					"cover": "https://i.scdn.co/image/ab67616d0000b273fce3403136900e151cf4493c",
+					"video": "https://www.youtube.com/watch?v=-daKQyGY2pM"
+				},
+				{
+					"title": "LOVELY♥CAVITY (feat. 初音ミク)",
+					"artist": "SAWTOWNE, Hatsune Miku",
+					"cover": "https://i.scdn.co/image/ab67616d0000b273ff9d384bb11a35be17229e65",
+					"video": "https://www.youtube.com/watch?v=MLdpBDgB9Tw"
+				},
+				{
+					"title": "I'm talking to you!",
+					"artist": "renaseri",
+					"cover": "https://i.scdn.co/image/ab67616d0000b2739b25882111e676dbdc03886c",
+					"video": "https://www.youtube.com/watch?v=yXmisSOv1u4"
+				},
+				{
+					"title": "Alien Alien",
+					"artist": "Nayutalien",
+					"cover": "https://i.scdn.co/image/ab67616d0000b273385ac348a7d7906a6cd9f0d7",
+					"video": "https://www.youtube.com/watch?v=2t1NMRse6aI"
+				},
+				{
+					"title": "Lover Girl (Kasane Teto)",
+					"artist": "Money Daruma",
+					"cover": "https://i.scdn.co/image/ab67616d0000b273966a73b6e9e602f39ffd4cd7",
+					"video": "https://www.youtube.com/watch?v=b68LYTaZBeg"
+				},
+				{
+					"title": "I Can't Wait",
+					"artist": "d0tc0mmie, GUMI",
+					"cover": "https://i.scdn.co/image/ab67616d0000b2739011c4ef96e9830b485b5f90",
+					"video": "https://www.youtube.com/watch?v=ESCmyMvPV_E"
+				},
+				{
+					"title": "君はできない子",
+					"artist": "Kikuo",
+					"cover": "https://i.scdn.co/image/ab67616d0000b273d1bd3a0ccc3fe60f8d6941ca",
+					"video": "https://www.youtube.com/watch?v=nPF7lit7Z00"
+				},
+				{
+					"title": "amedama",
+					"artist": "PEPOYO",
+					"cover": "https://i.scdn.co/image/ab67616d0000b273e8212d1797542b3d6b2ce777",
+					"video": "https://www.youtube.com/watch?v=_pKPFpX7Cqk"
+				},
+				{
+					"title": "good-bye declaration",
+					"artist": "Chinozo",
+					"cover": "https://i.scdn.co/image/ab67616d0000b2734aea0b70053a9e3dd4462ea0",
+					"video": "https://www.youtube.com/watch?v=dHXC_ahjtEE"
+				},
+				{
+					"title": "アブノーマリティ・ダンシンガール",
+					"artist": "ぐちり",
+					"cover": "https://i.scdn.co/image/ab67616d0000b2733a7487b686a85e35bb88dffd",
+					"video": "https://www.youtube.com/watch?v=SDt2OOdWR-Y"
+				},
+				{
+					"title": "FAILURE GIRL - MARETU Remix",
+					"artist": "Kairikibear, MARETU",
+					"cover": "https://i.scdn.co/image/ab67616d0000b2731aafc7fbf9ef51d4c1ccb6af",
+					"video": "https://www.youtube.com/watch?v=TXfJVNqaHiM"
+				},
+				{
+					"title": "ダイジョブですか？ (feat. 初音ミク)",
+					"artist": "cosMo@Bousou-P, Hatsune Miku",
+					"cover": "https://i.scdn.co/image/ab67616d0000b273615e5c8d833072a27108c05a",
+					"video": "https://www.youtube.com/watch?v=2AD1jTs516E"
+				},
+				{
+					"title": "Dai Dai Dai Kirai",
+					"artist": "dennokop",
+					"cover": "https://i.scdn.co/image/ab67616d0000b273598ed8263822f988b69ff859",
+					"video": "https://www.youtube.com/watch?v=v9rbbNKKjYM"
+				}
+			]
 		}
 	]
 }
