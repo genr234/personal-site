@@ -33,6 +33,18 @@ export const workItems: WorkItem[] = [
 		year: "July 2026",
 	},
 	{
+		id: "stardew",
+		tag: "coding",
+		title: "Stardew.js",
+		description:
+			"Stardew Valley ported to the web using WebAssembly with multiplayer support.",
+		images: ["/projects/stardewjs.png"],
+		icon: "/projects/stardew_logo.png",
+		href: "https://stardew.genr234.com/",
+		stack: ["alpinedotjs", "webassembly", "dotnet"],
+		year: "September 2026",
+	},
+	{
 		id: "campfire",
 		tag: "hackathons",
 		title: "Campfire Acireale",
@@ -46,7 +58,7 @@ export const workItems: WorkItem[] = [
 		id: "milkyway",
 		tag: "coding",
 		title: "Milkyway",
-		description: "Build your own little house by working on gamedev projects and get prizes!",
+		description: "Online platform for Milkyway, where over 3000 teenagers built their own little house logging over 17000 hours of gamedev and got prizes irl!",
 		images: ["/projects/milkyway.png", "/projects/milkyway2.png", "/projects/milkyway3.png"],
 		icon: "/projects/milkyway_icon.png",
 		badge: "https://hackatime.hackclub.com/api/v1/badge/U07JEDAMFV3/genr234/milkyway",
