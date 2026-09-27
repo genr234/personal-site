@@ -4,12 +4,12 @@ import type { WindowState } from "../../lib/types";
 import {
 	closeWindow,
 	focusWindow,
-	hiddenWindowHeaders,
 	expandWindow,
 	expandedWindowId,
 	mobileMode,
 	minimizeWindow,
 	updateWindowPosition,
+	windowHeaderOverrides,
 } from "../../lib/windowManager";
 import styles from "./styles/window.module.scss";
 import WindowContent from "./WindowContent.tsx";
@@ -35,8 +35,8 @@ export function Window({ windowState }: Props) {
 		zIndex,
 		focused,
 		variant,
-		headerBackground,
-		headerTextColor,
+		headerBackground: configHeaderBackground,
+		headerTextColor: configHeaderTextColor,
 	} = windowState;
 	const windowRef = useRef<HTMLDivElement>(null);
 	const [isDragging, setIsDragging] = useState(false);
@@ -100,7 +100,12 @@ export function Window({ windowState }: Props) {
 		};
 	}, [isDragging, id, x, y, width, height]);
 
-	const isHeaderHidden = useComputed(() => hiddenWindowHeaders.value.has(id));
+	const headerOverride = useComputed(() => windowHeaderOverrides.value[id]);
+	const isHeaderHidden = Boolean(headerOverride.value?.hidden);
+	const headerBackground =
+		headerOverride.value?.background ?? configHeaderBackground;
+	const headerTextColor =
+		headerOverride.value?.textColor ?? configHeaderTextColor;
 
 	return (
 		<div
@@ -109,7 +114,7 @@ export function Window({ windowState }: Props) {
 				styles.window,
 				focused && styles.windowFocused,
 				variant === "seamless" && styles.windowSeamless,
-				isHeaderHidden.value && styles.windowNoHeader,
+				isHeaderHidden && styles.windowNoHeader,
 				isExpanded.value && styles.windowExpanded,
 			]
 				.filter(Boolean)
@@ -135,16 +140,17 @@ export function Window({ windowState }: Props) {
 			role="dialog"
 			aria-label={title}
 		>
+			{!isHeaderHidden && (
 				<WindowHeader
-					id={id}
-				headerBackground={headerBackground}
-				headerTextColor={headerTextColor}
-				onClose={() => closeWindow(id)}
-				onMinimize={() => minimizeWindow(id)}
-				onMouseDown={handleMouseDown}
-				isDragging={isDragging}
-				variant={variant}
-			/>
+					headerBackground={headerBackground}
+					headerTextColor={headerTextColor}
+					onClose={() => closeWindow(id)}
+					onMinimize={() => minimizeWindow(id)}
+					onMouseDown={handleMouseDown}
+					isDragging={isDragging}
+					variant={variant}
+				/>
+			)}
 			<div
 				class={[
 					styles.windowContent,

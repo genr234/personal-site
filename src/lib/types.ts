@@ -26,6 +26,12 @@ export interface WindowConfig {
     shownByDefault?: boolean;
 }
 
+export interface WindowHeaderOverride {
+	hidden?: boolean;
+	background?: string;
+	textColor?: string;
+}
+
 export interface WindowState extends WindowConfig {
 	x: number;
 	y: number;

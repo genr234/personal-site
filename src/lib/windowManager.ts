@@ -1,5 +1,10 @@
 import { computed, signal } from "@preact/signals";
-import type { Position, WindowConfig, WindowState } from "./types";
+import type {
+	Position,
+	WindowConfig,
+	WindowHeaderOverride,
+	WindowState,
+} from "./types";
 
 const CASCADE_OFFSET = 40;
 const CASCADE_START: Position = { x: 100, y: 80 };
@@ -27,14 +32,20 @@ export function collapseWindow() {
 }
 
 
-// Allows content (e.g. music player) to hide the header.
-export const hiddenWindowHeaders = signal<Set<string>>(new Set());
+// Lets window content (e.g. the music player) restyle or hide its own header at runtime.
+// Values set here take precedence over the window's config.
+export const windowHeaderOverrides = signal<
+	Record<string, WindowHeaderOverride>
+>({});
 
-export function setWindowHeaderHidden(windowId: string, hidden: boolean) {
-	const next = new Set(hiddenWindowHeaders.value);
-	if (hidden) next.add(windowId);
-	else next.delete(windowId);
-	hiddenWindowHeaders.value = next;
+export function setWindowHeader(
+	windowId: string,
+	override: WindowHeaderOverride | null,
+) {
+	const next = { ...windowHeaderOverrides.value };
+	if (override) next[windowId] = override;
+	else delete next[windowId];
+	windowHeaderOverrides.value = next;
 }
 
 export const activeWindows = computed(() =>

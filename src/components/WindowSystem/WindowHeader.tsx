@@ -1,9 +1,6 @@
-import { useComputed } from "@preact/signals";
-import { hiddenWindowHeaders } from "../../lib/windowManager";
 import styles from "./styles/window.module.scss";
 
 interface WindowHeaderProps {
-	id: string;
 	onClose: () => void;
 	onMinimize: () => void;
 	onBack?: () => void;
@@ -15,7 +12,6 @@ interface WindowHeaderProps {
 }
 
 export function WindowHeader({
-									 id,
 									 onClose,
 									 onMinimize,
 									 onBack,
@@ -25,9 +21,6 @@ export function WindowHeader({
 								 headerBackground,
 								 headerTextColor,
 							 }: WindowHeaderProps) {
-	const isHidden = useComputed(() => hiddenWindowHeaders.value.has(id));
-	if (isHidden.value) return null;
-
 	const headerStyle =
 		variant === "seamless"
 			? ({
