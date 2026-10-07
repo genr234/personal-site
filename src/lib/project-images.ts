@@ -16,3 +16,7 @@ export function projectImageSrcSet(src: string): string | undefined {
 	if (!variants?.length) return undefined;
 	return formatProjectSrcSet(variants);
 }
+
+export function projectImageVariants(src: string): ProjectImageVariant[] {
+	return srcsets[src] ?? [];
+}

@@ -12,6 +12,8 @@ export interface WorkItem {
 	year: string;
 	longDescription?: string;
 	badge?: string;
+	/** Hackatime project name, when it differs from the id. */
+	hackatime?: string;
 	stack?: string[];
 }
 
@@ -42,6 +44,7 @@ export const workItems: WorkItem[] = [
 		icon: "/projects/stardew_logo.png",
 		href: "https://stardew.genr234.com/",
 		stack: ["alpinedotjs", "webassembly", "dotnet"],
+		hackatime: "stardew-web",
 		year: "September 2026",
 	},
 	{
